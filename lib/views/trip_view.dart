@@ -26,11 +26,8 @@ class TripListPage extends StatefulWidget {
 }
 
 class _TripListPageState extends State<TripListPage> {
-  // 列表
-  dynamic objs;
-
-  // 路径
-  String? path;
+  dynamic objs; // 列表
+  String? path; // 路径
 
   refreshTripList() async {
     path ??= await getApplicationDocumentsDirectoryPath();
@@ -39,13 +36,11 @@ class _TripListPageState extends State<TripListPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        children: [
-          Expanded(child: tripListWidget()),
-          SizedBox(height: 10),
-        ],
-      ),
+    return Column(
+      children: [
+        Expanded(child: tripListWidget()),
+        const SizedBox(height: 10),
+      ],
     );
   }
 
@@ -55,18 +50,18 @@ class _TripListPageState extends State<TripListPage> {
       builder: (BuildContext context, AsyncSnapshot snapshot) {
         if (snapshot.hasData) {
           if (snapshot.data!.isEmpty) {
-            return Center(
+            return const Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
                     '欲买桂花同载酒',
-                    style: TextStyle(fontSize: 20.0),
+                    style: TextStyle(fontSize: 20),
                   ),
                   SizedBox(height: 10),
                   Text(
                     '终不似 少年游',
-                    style: TextStyle(fontSize: 20.0),
+                    style: TextStyle(fontSize: 20),
                   ),
                 ],
               ),
@@ -80,11 +75,11 @@ class _TripListPageState extends State<TripListPage> {
             crossAxisCount: 2,
             mainAxisSpacing: 8,
             crossAxisSpacing: 8,
-            itemCount: snapshot.data.length,
+            itemCount: objs.length,
             itemBuilder: _getItem,
           );
         } else {
-          return Center(child: CircularProgressIndicator());
+          return const Center(child: CircularProgressIndicator());
         }
       },
     );
@@ -113,19 +108,17 @@ class _TripListPageState extends State<TripListPage> {
               onClosing: () {},
               builder: (BuildContext context) {
                 return SizedBox(
-                  height: 150,
+                  height: 120,
                   child: Column(
                     children: [
                       Padding(
-                        padding: const EdgeInsets.all(10.0),
+                        padding: const EdgeInsets.all(10),
                         child: Text(
                           item.name,
-                          style: TextStyle(
-                            fontSize: 16.0,
-                          ),
+                          style: const TextStyle(fontSize: 16),
                         ),
                       ),
-                      SizedBox(height: 5),
+                      const SizedBox(height: 5),
                       Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
@@ -144,30 +137,30 @@ class _TripListPageState extends State<TripListPage> {
                                 ),
                               );
                             },
-                            icon: Icon(Icons.edit),
-                            label: Text('编辑'),
+                            icon: const Icon(Icons.edit),
+                            label: const Text('编辑'),
                             style: ElevatedButton.styleFrom(
-                              textStyle: TextStyle(fontWeight: FontWeight.bold),
-                              backgroundColor: Color(0xFF0392CF),
+                              textStyle: const TextStyle(fontWeight: FontWeight.bold),
+                              backgroundColor: Colors.blue,
                               foregroundColor: Colors.white,
                             ),
                           ),
-                          SizedBox(width: 30),
+                          const SizedBox(width: 30),
                           ElevatedButton.icon(
                             onPressed: () async {
                               Navigator.of(context).pop(); // 关闭
                               bool? delete = await showDeleteConfirmDialog(item.name);
                               if (delete == true) {
                                 await TripProvider().deleteTripCascade(item.id);
-                                objs.remove(item);
+                                // objs.remove(item);
                                 setState(() {});
                               }
                             },
-                            icon: Icon(Icons.delete),
-                            label: Text('删除'),
+                            icon: const Icon(Icons.delete),
+                            label: const Text('删除'),
                             style: ElevatedButton.styleFrom(
-                              textStyle: TextStyle(fontWeight: FontWeight.bold),
-                              backgroundColor: Color.fromARGB(255, 205, 50, 36),
+                              textStyle: const TextStyle(fontWeight: FontWeight.bold),
+                              backgroundColor: const Color.fromARGB(255, 205, 50, 36),
                               foregroundColor: Colors.white,
                             ),
                           ),
@@ -182,7 +175,7 @@ class _TripListPageState extends State<TripListPage> {
         );
       },
       child: Container(
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           color: Colors.white,
         ),
         child: Column(
@@ -192,12 +185,12 @@ class _TripListPageState extends State<TripListPage> {
                 File('$path/${item.pic}'),
               ),
             ] else ...[
-              Image(
+              const Image(
                 image: AssetImage("images/sailimuhu.jpg"),
               ),
             ],
             Container(
-              padding: EdgeInsets.all(8),
+              padding: const EdgeInsets.all(8),
               alignment: Alignment.centerLeft,
               child: Text(item.name),
             ),
@@ -212,18 +205,24 @@ class _TripListPageState extends State<TripListPage> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text("提示"),
+          title: const Text(
+            "提示",
+            style: TextStyle(fontSize: 20),
+          ),
           content: Text(
             "您确定要删除该旅程\n\n$name ？",
             textAlign: TextAlign.center,
           ),
           actions: <Widget>[
             TextButton(
-              child: Text("取消"),
+              child: const Text("取消"),
               onPressed: () => Navigator.of(context).pop(false),
             ),
             TextButton(
-              child: Text("删除"),
+              child: const Text(
+                "删除",
+                style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+              ),
               onPressed: () => Navigator.of(context).pop(true),
             ),
           ],
@@ -359,6 +358,7 @@ class _TripPageState extends State<TripPage> {
                 children: [
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
+                      textStyle: const TextStyle(fontWeight: FontWeight.bold),
                       backgroundColor: Colors.grey,
                       foregroundColor: Colors.white,
                     ),
@@ -370,6 +370,7 @@ class _TripPageState extends State<TripPage> {
                   const SizedBox(width: 30),
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
+                      textStyle: const TextStyle(fontWeight: FontWeight.bold),
                       backgroundColor: Colors.green,
                       foregroundColor: Colors.white,
                     ),
