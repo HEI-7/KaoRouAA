@@ -7,9 +7,6 @@ import 'package:sqflite/sqflite.dart';
 // 数据库版本
 const dbVersion = 1;
 
-// 开发环境
-const debug = false;
-
 class DBProvider {
   // 单例模式
   DBProvider();
@@ -29,13 +26,8 @@ class DBProvider {
     WidgetsFlutterBinding.ensureInitialized();
 
     // 数据库路径
-    String databasePath = join(await getDatabasesPath(), 'account_database.db');
-
-    // 开发环境
-    if (debug) {
-      debugPrint(databasePath);
-      await deleteDatabase(databasePath);
-    }
+    String databasePath = join(await getDatabasesPath(), 'kao_rou_aa.db');
+    // await deleteDatabase(databasePath);
 
     return await openDatabase(
       databasePath,
@@ -47,7 +39,7 @@ class DBProvider {
 
   // 创建表
   Future _onCreate(Database db, int version) async {
-    // await db.execute("PRAGMA foreign_keys = ON;"); // 打开外键约束 没用？
+    // await db.execute("PRAGMA foreign_keys = ON;"); // 打开外键约束
 
     await db.execute("""
       CREATE TABLE trip (
@@ -96,8 +88,5 @@ class DBProvider {
     """);
   }
 
-  Future _onUpgrade(Database db, int oldVersion, int newVersion) async {
-    debugPrint(oldVersion.toString());
-    debugPrint(newVersion.toString());
-  }
+  Future _onUpgrade(Database db, int oldVersion, int newVersion) async {}
 }

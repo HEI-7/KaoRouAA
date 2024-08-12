@@ -2,7 +2,7 @@ class TripUser {
   final int? id;
   final int? tripId;
   final String name; // 昵称
-  final String avatar; // 头像
+  final String? avatar; // 头像
   final double? pay; // 应付
   final double? payAct; // 实付
 
@@ -10,7 +10,7 @@ class TripUser {
     this.id,
     this.tripId,
     required this.name,
-    required this.avatar,
+    this.avatar,
     this.pay,
     this.payAct,
   });
