@@ -1,4 +1,4 @@
-package com.example.kao_rou_aa
+package com.heiarsenal.kao_rou_aa
 
 import io.flutter.embedding.android.FlutterActivity
 
