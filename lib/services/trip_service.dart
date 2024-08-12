@@ -9,7 +9,7 @@ import 'package:kao_rou_aa/models/trip_bill_detail.dart';
 import 'package:kao_rou_aa/services/database_service.dart';
 
 class TripProvider extends DBProvider {
-  // 继承？
+  // 继承
   static final TripProvider instance = TripProvider();
 
   Future<Database> get _db async => super.database;
@@ -18,15 +18,6 @@ class TripProvider extends DBProvider {
   Future<void> insertTrip(Trip trip) async {
     final db = await _db;
     await db.insert('trip', trip.toMap());
-  }
-
-  Future<void> deleteTrip(int id) async {
-    final db = await _db;
-    await db.delete(
-      'trip',
-      where: 'id = ?',
-      whereArgs: [id],
-    );
   }
 
   Future<void> deleteTripCascade(int id) async {
@@ -50,7 +41,6 @@ class TripProvider extends DBProvider {
       where: 'id = ?',
       whereArgs: [id],
     );
-
     await batch.commit();
   }
 
@@ -85,15 +75,6 @@ class TripProvider extends DBProvider {
   Future<void> insertTripUser(TripUser tripUser) async {
     final db = await _db;
     await db.insert('trip_user', tripUser.toMap());
-  }
-
-  Future<void> deleteTripUser(int id) async {
-    final db = await _db;
-    await db.delete(
-      'trip_user',
-      where: 'id = ?',
-      whereArgs: [id],
-    );
   }
 
   Future<bool> deleteTripUserCascade(int id) async {
@@ -167,15 +148,6 @@ class TripProvider extends DBProvider {
     return await db.insert('trip_bill', tripBill.toMap());
   }
 
-  Future<void> deleteTripBill(int id) async {
-    final db = await _db;
-    await db.delete(
-      'trip_bill',
-      where: 'id = ?',
-      whereArgs: [id],
-    );
-  }
-
   Future<void> deleteTripBillCascade(int id) async {
     final db = await _db;
     final batch = db.batch();
@@ -189,7 +161,6 @@ class TripProvider extends DBProvider {
       where: 'id = ?',
       whereArgs: [id],
     );
-
     await batch.commit();
   }
 
@@ -260,7 +231,6 @@ class TripProvider extends DBProvider {
     for (var obj in objs) {
       batch.insert('trip_bill_detail', obj.toMap());
     }
-
     await batch.commit();
   }
 
