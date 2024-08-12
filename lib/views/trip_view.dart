@@ -19,6 +19,8 @@ Future<String> getApplicationDocumentsDirectoryPath() async {
 }
 
 class TripListPage extends StatefulWidget {
+  const TripListPage({super.key});
+
   @override
   State<TripListPage> createState() => _TripListPageState();
 }
@@ -294,128 +296,121 @@ class _TripPageState extends State<TripPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(desc),
+        centerTitle: true,
+        title: Text(
+          desc,
+          style: const TextStyle(fontSize: 20),
+        ),
       ),
       body: SingleChildScrollView(
-        child: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(15.0),
-            child: Column(
-              children: [
-                TextField(
-                  maxLength: 20,
-                  // autofocus: true,
-                  controller: nameController,
-                  decoration: InputDecoration(
-                    labelText: '名称',
-                    hintText: '请输入名称',
-                    prefixIcon: Icon(Icons.map),
-                  ),
+        child: Padding(
+          padding: const EdgeInsets.all(15),
+          child: Column(
+            children: [
+              TextField(
+                maxLength: 20,
+                controller: nameController,
+                decoration: const InputDecoration(
+                  labelText: '名称',
+                  hintText: '请输入名称',
+                  prefixIcon: Icon(Icons.map),
                 ),
-                SizedBox(height: 10),
+              ),
+              const SizedBox(height: 10),
 
-                // image
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Row(
-                    children: [
-                      TextButton.icon(
-                        icon: Icon(Icons.image),
-                        label: Text("选择图片"),
-                        onPressed: () {
-                          getImage();
-                        },
-                      ),
-                      TextButton(
-                        child: Text('或使用默认图片', style: TextStyle(color: Colors.grey)),
-                        onPressed: () {
-                          picPath.value = '';
-                        },
-                      ),
-                    ],
+              // image
+              Row(
+                children: [
+                  TextButton.icon(
+                    icon: const Icon(Icons.image),
+                    label: const Text("选择图片"),
+                    onPressed: () {
+                      getImage();
+                    },
                   ),
-                ),
-                SizedBox(height: 10),
-                ValueListenableBuilder(
-                  valueListenable: picPath,
-                  builder: (context, value, child) {
-                    if (picPath.value != '') {
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 20.0),
-                        child: Image.file(
-                          File('$path/${picPath.value}'),
-                        ),
-                      );
-                    } else {
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 20.0),
-                        child: Image(
-                          image: AssetImage("images/sailimuhu.jpg"),
-                        ),
-                      );
-                    }
-                  },
-                ),
-                // image
+                  TextButton(
+                    child: const Text('或使用默认图片', style: TextStyle(color: Colors.grey)),
+                    onPressed: () {
+                      picPath.value = '';
+                    },
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              ValueListenableBuilder(
+                valueListenable: picPath,
+                builder: (context, value, child) {
+                  if (picPath.value != '') {
+                    return Image.file(
+                      File('$path/${picPath.value}'),
+                    );
+                  } else {
+                    return const Image(
+                      image: AssetImage("images/sailimuhu.jpg"),
+                    );
+                  }
+                },
+              ),
+              const SizedBox(height: 20),
+              // image
 
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Color.fromARGB(255, 113, 111, 111),
-                        foregroundColor: Colors.white,
-                      ),
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
-                      child: Text('取消'),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.grey,
+                      foregroundColor: Colors.white,
                     ),
-                    SizedBox(width: 30),
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Color.fromARGB(255, 10, 132, 10),
-                        foregroundColor: Colors.white,
-                      ),
-                      onPressed: () {
-                        String input = nameController.text;
-                        if (input == '') {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text(
-                                '请输入名称',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 16,
-                                ),
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    child: const Text('取消'),
+                  ),
+                  const SizedBox(width: 30),
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.green,
+                      foregroundColor: Colors.white,
+                    ),
+                    onPressed: () {
+                      String input = nameController.text;
+                      if (input == '') {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                              '请输入名称',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
                               ),
-                              backgroundColor: Color.fromARGB(255, 205, 50, 36),
-                              duration: Durations.long3,
                             ),
-                          );
-                          return;
-                        }
-
-                        if (widget.id == null) {
-                          createTrip(input);
-                        } else {
-                          updateTrip(input);
-                        }
-
-                        Navigator.pushAndRemoveUntil(
-                          context,
-                          MaterialPageRoute(builder: (context) => MyHomePage()),
-                          (route) => false,
+                            backgroundColor: Color.fromARGB(255, 205, 50, 36),
+                            duration: Durations.long3,
+                          ),
                         );
-                      },
-                      child: Text('确认'),
-                    ),
-                  ],
-                ),
-                SizedBox(height: 10),
-              ],
-            ),
+                        return;
+                      }
+
+                      if (widget.id == null) {
+                        createTrip(input);
+                      } else {
+                        updateTrip(input);
+                      }
+
+                      Navigator.pushAndRemoveUntil(
+                        context,
+                        MaterialPageRoute(builder: (context) => const MyHomePage()),
+                        (route) => false,
+                      );
+                    },
+                    child: const Text('确认'),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+            ],
           ),
         ),
       ),
@@ -438,7 +433,7 @@ class TripDetailPage extends StatefulWidget {
 }
 
 class _TripDetailPageState extends State<TripDetailPage> {
-  var selectedIndex = 0;
+  int selectedIndex = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -454,25 +449,35 @@ class _TripDetailPageState extends State<TripDetailPage> {
         throw UnimplementedError('no widget for $selectedIndex');
     }
 
-    return LayoutBuilder(builder: (context, constraints) {
-      return Scaffold(
-        appBar: AppBar(
-          title: Text(widget.tripName),
+    return Scaffold(
+      appBar: AppBar(
+        centerTitle: true,
+        title: Text(
+          widget.tripName,
+          style: const TextStyle(fontSize: 20),
         ),
-        body: SafeArea(child: page),
-        bottomNavigationBar: BottomNavigationBar(
-          currentIndex: selectedIndex,
-          onTap: (int index) {
-            setState(() {
-              selectedIndex = index;
-            });
-          },
-          items: const [
-            BottomNavigationBarItem(icon: Icon(Icons.person), label: '成员'),
-            BottomNavigationBarItem(icon: Icon(Icons.feed), label: '流水'),
-          ],
-        ),
-      );
-    });
+      ),
+      body: SafeArea(child: page),
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: selectedIndex,
+        onTap: (int index) {
+          setState(() {
+            selectedIndex = index;
+          });
+        },
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person_outlined),
+            activeIcon: Icon(Icons.person),
+            label: '团员',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.feed_outlined),
+            activeIcon: Icon(Icons.feed),
+            label: '流水',
+          ),
+        ],
+      ),
+    );
   }
 }
