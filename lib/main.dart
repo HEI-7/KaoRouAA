@@ -15,7 +15,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: '烤肉AA记',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),
         useMaterial3: true,
       ),
       debugShowCheckedModeBanner: false,
@@ -39,30 +39,30 @@ class MyHomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        centerTitle: true,
+        title: const Text(
+          '我的旅程',
+          style: TextStyle(fontSize: 20),
+        ),
+      ),
       body: SafeArea(child: TripListPage()),
       bottomNavigationBar: Padding(
-        padding: const EdgeInsets.only(left: 20.0, right: 20.0, bottom: 20.0),
-        child: Row(
-          children: [
-            Expanded(
-              flex: 9,
-              child: ElevatedButton.icon(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const TripPage()),
-                  );
-                },
-                icon: const Icon(Icons.add),
-                label: const Text('又 去 浪'),
-                style: ElevatedButton.styleFrom(
-                  textStyle: const TextStyle(fontSize: 14.0, fontWeight: FontWeight.bold),
-                  backgroundColor: const Color.fromARGB(255, 205, 50, 36),
-                  foregroundColor: Colors.white,
-                ),
-              ),
-            ),
-          ],
+        padding: const EdgeInsets.only(left: 20, right: 20, bottom: 20),
+        child: ElevatedButton.icon(
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const TripPage()),
+            );
+          },
+          icon: const Icon(Icons.add),
+          label: const Text('又 去 浪'),
+          style: ElevatedButton.styleFrom(
+            textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+            backgroundColor: const Color.fromARGB(255, 205, 50, 36),
+            foregroundColor: Colors.white,
+          ),
         ),
       ),
     );
