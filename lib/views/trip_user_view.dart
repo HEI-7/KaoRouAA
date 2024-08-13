@@ -92,44 +92,32 @@ class _TripUserListPageState extends State<TripUserListPage> {
             itemBuilder: (context, index) {
               if (index == snapshot.data.length) {
                 return Container(
-                  decoration: BoxDecoration(
+                  decoration: const BoxDecoration(
                     border: Border(
                       top: BorderSide(color: Colors.grey, width: 0.5),
                     ),
                   ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(15.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          '总计 ${payAct.toStringAsFixed(2)}',
-                          style: TextStyle(fontSize: 18),
-                        ),
-                        // IconButton(
-                        //   iconSize: 35,
-                        //   icon: Icon(Icons.refresh),
-                        //   onPressed: () async {
-                        //     refresh = true;
-                        //     setState(() {});
-                        //     await refreshTripUserList();
-                        //   },
-                        // ),
-                      ],
+                  child: Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(15),
+                      child: Text(
+                        '总计 ${payAct.toStringAsFixed(2)}',
+                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      ),
                     ),
                   ),
                 );
               }
 
               var item = snapshot.data[index];
-              var border = Border();
-              if (index < snapshot.data.length - 1) {
-                border = Border(bottom: BorderSide(color: Colors.grey, width: 0.5));
+              var border = const Border(bottom: BorderSide(color: Colors.grey, width: 0.5));
+              if (index == snapshot.data.length - 1) {
+                border = const Border();
               }
               return Slidable(
                 key: ValueKey(index),
                 endActionPane: ActionPane(
-                  motion: ScrollMotion(),
+                  motion: const ScrollMotion(),
                   extentRatio: 0.2,
                   children: [
                     SlidableAction(
@@ -144,7 +132,7 @@ class _TripUserListPageState extends State<TripUserListPage> {
                           }
                         }
                       },
-                      backgroundColor: Color(0xFFFE4A49),
+                      backgroundColor: Colors.red,
                       icon: Icons.delete,
                     ),
                   ],
@@ -170,25 +158,27 @@ class _TripUserListPageState extends State<TripUserListPage> {
                   child: Row(
                     children: [
                       Padding(
-                        padding: const EdgeInsets.only(left: 10.0, right: 10.0),
-                        child: Image.asset('images/${item.avatar}'),
+                        padding: const EdgeInsets.only(left: 10, right: 10),
+                        child: Image.asset(
+                          'images/${item.avatar}',
+                          width: 45,
+                        ),
                       ),
-                      // SizedBox(width: 20),
                       Expanded(
                         child: Container(
                           decoration: BoxDecoration(
                             border: border,
                           ),
                           child: Padding(
-                            padding: const EdgeInsets.only(left: 7.0, top: 12.0, bottom: 12.0),
+                            padding: const EdgeInsets.only(left: 7, top: 12, bottom: 12),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
                                   item.name,
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                     fontWeight: FontWeight.bold,
-                                    fontSize: 20,
+                                    fontSize: 18,
                                   ),
                                 ),
                                 Text("应付 ${item.pay.toStringAsFixed(2)}，实付 ${item.payAct.toStringAsFixed(2)}"),
@@ -213,21 +203,27 @@ class _TripUserListPageState extends State<TripUserListPage> {
   Future<bool?> showDeleteConfirmDialog(String name) {
     return showDialog<bool>(
       context: context,
-      barrierDismissible: false, // user must tap button!
+      barrierDismissible: false,
       builder: (context) {
         return AlertDialog(
-          title: Text("提示"),
+          title: const Text(
+            "提示",
+            style: TextStyle(fontSize: 20),
+          ),
           content: Text(
-            "您确定要删除该成员\n\n$name ？",
+            "您确定要删除该团员\n\n$name ？",
             textAlign: TextAlign.center,
           ),
           actions: <Widget>[
             TextButton(
-              child: Text("取消"),
+              child: const Text("取消"),
               onPressed: () => Navigator.of(context).pop(false),
             ),
             TextButton(
-              child: Text("删除"),
+              child: const Text(
+                "删除",
+                style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+              ),
               onPressed: () => Navigator.of(context).pop(true),
             ),
           ],
@@ -239,7 +235,7 @@ class _TripUserListPageState extends State<TripUserListPage> {
   Future<void> _showErrorDialog() async {
     return showDialog<void>(
       context: context,
-      barrierDismissible: false, // user must tap button!
+      barrierDismissible: false,
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text('注意'),

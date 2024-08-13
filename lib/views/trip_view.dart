@@ -203,6 +203,7 @@ class _TripListPageState extends State<TripListPage> {
   Future<bool?> showDeleteConfirmDialog(String name) {
     return showDialog<bool>(
       context: context,
+      barrierDismissible: false,
       builder: (context) {
         return AlertDialog(
           title: const Text(
