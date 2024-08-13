@@ -26,30 +26,18 @@ class TripListPage extends StatefulWidget {
 }
 
 class _TripListPageState extends State<TripListPage> {
+  Future? tripList;
   dynamic objs; // 列表
   String? path; // 路径
 
   refreshTripList() async {
-    print(2);
-
     path ??= await getApplicationDocumentsDirectoryPath();
-
-    print(3);
-
-    return TripProvider().listTrip();
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    print(0);
-    refreshTripList();
+    tripList ??= TripProvider().listTrip();
+    return tripList;
   }
 
   @override
   Widget build(BuildContext context) {
-    print(1);
-
     return Column(
       children: [
         Expanded(child: tripListWidget()),
@@ -166,7 +154,7 @@ class _TripListPageState extends State<TripListPage> {
                               bool? delete = await showDeleteConfirmDialog(item.name);
                               if (delete == true) {
                                 await TripProvider().deleteTripCascade(item.id);
-                                // objs.remove(item);
+                                objs.remove(item);
                                 setState(() {});
                               }
                             },
