@@ -30,12 +30,26 @@ class _TripListPageState extends State<TripListPage> {
   String? path; // 路径
 
   refreshTripList() async {
+    print(2);
+
     path ??= await getApplicationDocumentsDirectoryPath();
+
+    print(3);
+
     return TripProvider().listTrip();
   }
 
   @override
+  void initState() {
+    super.initState();
+    print(0);
+    refreshTripList();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    print(1);
+
     return Column(
       children: [
         Expanded(child: tripListWidget()),
@@ -233,8 +247,8 @@ class _TripListPageState extends State<TripListPage> {
   }
 }
 
-class TripPage extends StatefulWidget {
-  const TripPage({
+class TripPage extends StatelessWidget {
+  TripPage({
     super.key,
     this.id,
     this.name,
@@ -247,52 +261,33 @@ class TripPage extends StatefulWidget {
   final String? pic;
   final String? path;
 
-  @override
-  State<TripPage> createState() => _TripPageState();
-}
-
-class _TripPageState extends State<TripPage> {
-  final ValueNotifier<String> picPath = ValueNotifier<String>('');
-
-  String? path;
+  final nameController = TextEditingController();
+  final picPath = ValueNotifier<String>('');
 
   void createTrip(String input) async {
-    var trip = Trip(id: widget.id, name: input, pic: picPath.value);
+    var trip = Trip(id: id, name: input, pic: picPath.value);
     await TripProvider().insertTrip(trip);
   }
 
   void updateTrip(String input) async {
-    var trip = Trip(id: widget.id, name: input, pic: picPath.value);
+    var trip = Trip(id: id, name: input, pic: picPath.value);
     await TripProvider().updateTrip(trip);
-  }
-
-  Future getImage() async {
-    path ??= await getApplicationDocumentsDirectoryPath();
-
-    final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery, imageQuality: 30);
-    if (pickedFile != null) {
-      pickedFile.saveTo('$path/${pickedFile.name}');
-      picPath.value = pickedFile.name;
-    }
   }
 
   @override
   Widget build(BuildContext context) {
     String desc = '新增旅程';
-    if (widget.id != null) {
+    if (id != null) {
       desc = '修改旅程';
     }
 
-    var nameController = TextEditingController();
-    if (widget.name != null) {
-      nameController.text = widget.name!;
+    if (name != null) {
+      nameController.text = name!;
     }
-    if (widget.pic != null) {
-      picPath.value = widget.pic!;
+    if (pic != null) {
+      picPath.value = pic!;
     }
-    if (widget.path != null) {
-      path = widget.path!;
-    }
+    String? savePath = path;
 
     return Scaffold(
       appBar: AppBar(
@@ -324,8 +319,14 @@ class _TripPageState extends State<TripPage> {
                   TextButton.icon(
                     icon: const Icon(Icons.image),
                     label: const Text("选择图片"),
-                    onPressed: () {
-                      getImage();
+                    onPressed: () async {
+                      savePath ??= await getApplicationDocumentsDirectoryPath();
+
+                      final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery, imageQuality: 10);
+                      if (pickedFile != null) {
+                        pickedFile.saveTo('$savePath/${pickedFile.name}');
+                        picPath.value = pickedFile.name;
+                      }
                     },
                   ),
                   TextButton(
@@ -342,7 +343,7 @@ class _TripPageState extends State<TripPage> {
                 builder: (context, value, child) {
                   if (picPath.value != '') {
                     return Image.file(
-                      File('$path/${picPath.value}'),
+                      File('$savePath/${picPath.value}'),
                     );
                   } else {
                     return const Image(
@@ -395,7 +396,7 @@ class _TripPageState extends State<TripPage> {
                         return;
                       }
 
-                      if (widget.id == null) {
+                      if (id == null) {
                         createTrip(input);
                       } else {
                         updateTrip(input);

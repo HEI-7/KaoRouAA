@@ -53,7 +53,7 @@ class MyHomePage extends StatelessWidget {
           onPressed: () {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => const TripPage()),
+              MaterialPageRoute(builder: (context) => TripPage()),
             );
           },
           icon: const Icon(Icons.add),
