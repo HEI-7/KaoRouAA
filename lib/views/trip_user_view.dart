@@ -21,7 +21,7 @@ class TripUserListPage extends StatefulWidget {
 class _TripUserListPageState extends State<TripUserListPage> {
   Future? tripUserList;
   double payAct = 0.00;
-  bool refresh = false;
+  // bool refresh = false;
 
   refreshTripUserList() async {
     // 计算
@@ -32,6 +32,7 @@ class _TripUserListPageState extends State<TripUserListPage> {
     payAct = await TripProvider().queryTripPay(widget.tripId);
     tripUserList = TripProvider().listTripUser(widget.tripId);
 
+    print(1);
     // refresh = false;
     setState(() {});
   }
@@ -39,49 +40,36 @@ class _TripUserListPageState extends State<TripUserListPage> {
   @override
   void initState() {
     super.initState();
+    print(0);
     refreshTripUserList();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        children: [
-          Container(
-            decoration: BoxDecoration(
-              border: Border(
-                bottom: BorderSide(color: Colors.grey, width: 0.5),
-              ),
-            ),
-            child: Align(
-              alignment: Alignment.bottomRight,
-              child: IconButton(
-                iconSize: 35,
-                icon: Icon(Icons.add_box),
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => TripUserPage(tripId: widget.tripId)),
-                  ).then((refreshFlag) {
-                    if (refreshFlag == true) {
-                      refreshTripUserList();
-                    }
-                  });
-                },
-              ),
+    return Column(
+      children: [
+        Expanded(child: tripUserListWidget()),
+        Align(
+          alignment: Alignment.centerRight,
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: FloatingActionButton.small(
+              elevation: 1,
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => TripUserPage(tripId: widget.tripId)),
+                ).then((refreshFlag) {
+                  if (refreshFlag == true) {
+                    refreshTripUserList();
+                  }
+                });
+              },
+              child: const Icon(Icons.add),
             ),
           ),
-          Expanded(
-            child: Container(
-              decoration: BoxDecoration(
-                color: Color.fromARGB(255, 240, 233, 233),
-              ),
-              child: tripUserListWidget(),
-            ),
-          ),
-          // SizedBox(height: 10),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
@@ -89,12 +77,12 @@ class _TripUserListPageState extends State<TripUserListPage> {
     return FutureBuilder(
       future: tripUserList,
       builder: (BuildContext context, AsyncSnapshot snapshot) {
-        if (snapshot.hasData && !refresh) {
+        if (snapshot.hasData) {
           if (snapshot.data!.isEmpty) {
-            return Center(
-              child: const Text(
-                '暂时没有成员',
-                style: TextStyle(fontSize: 20.0),
+            return const Center(
+              child: Text(
+                '暂时没有团员',
+                style: TextStyle(fontSize: 20),
               ),
             );
           }
@@ -216,7 +204,7 @@ class _TripUserListPageState extends State<TripUserListPage> {
             },
           );
         } else {
-          return Center(child: CircularProgressIndicator());
+          return const Center(child: CircularProgressIndicator());
         }
       },
     );
@@ -319,9 +307,9 @@ class TripUserPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    String desc = '新增成员';
+    String desc = '新增团员';
     if (id != null) {
-      desc = '修改成员';
+      desc = '修改团员';
     }
 
     var nameController = TextEditingController();
@@ -334,149 +322,151 @@ class TripUserPage extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(desc),
+        centerTitle: true,
+        title: Text(
+          desc,
+          style: const TextStyle(fontSize: 20),
+        ),
       ),
       body: SingleChildScrollView(
-        child: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(15.0),
-            child: Column(
-              children: [
-                TextField(
-                  maxLength: 20,
-                  // autofocus: true,
-                  controller: nameController,
-                  decoration: InputDecoration(
-                    labelText: '昵称',
-                    hintText: '请输入昵称',
-                    prefixIcon: Icon(Icons.person),
-                  ),
+        child: Padding(
+          padding: const EdgeInsets.all(15),
+          child: Column(
+            children: [
+              TextField(
+                maxLength: 20,
+                controller: nameController,
+                decoration: const InputDecoration(
+                  labelText: '昵称',
+                  hintText: '请输入昵称',
+                  prefixIcon: Icon(Icons.person),
                 ),
-                SizedBox(height: 10),
+              ),
+              const SizedBox(height: 10),
 
-                // avatar
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    '选择头像',
-                    style: TextStyle(
-                      color: const Color.fromARGB(255, 205, 50, 36),
-                      fontWeight: FontWeight.bold,
-                    ),
+              // avatar
+              Row(
+                children: [
+                  TextButton.icon(
+                    icon: const Icon(Icons.image),
+                    label: const Text("选择头像"),
+                    onPressed: () {},
                   ),
-                ),
-                SizedBox(height: 10),
-                SizedBox(
-                  child: ValueListenableBuilder(
-                    valueListenable: avatarPick,
-                    builder: (context, value, child) {
-                      return GridView.builder(
-                        physics: NeverScrollableScrollPhysics(),
-                        shrinkWrap: true,
-                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 4,
-                          mainAxisSpacing: 8,
-                          crossAxisSpacing: 8,
-                          childAspectRatio: 1.0,
-                        ),
-                        itemCount: avatars.length,
-                        itemBuilder: (context, index) {
-                          if (avatarPick.value == avatars[index]) {
-                            return GestureDetector(
-                              onTap: () {},
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  border: Border.all(color: Colors.black),
-                                  borderRadius: BorderRadius.circular(7),
-                                ),
-                                child: Image.asset('images/${avatarPick.value}'),
-                              ),
-                            );
-                          } else {
-                            return GestureDetector(
-                              onTap: () {
-                                avatarPick.value = avatars[index];
-                              },
-                              child: Image.asset('images/${avatars[index]}'),
-                            );
-                          }
-                        },
-                      );
+                ],
+              ),
+              const SizedBox(height: 10),
+              ValueListenableBuilder(
+                valueListenable: avatarPick,
+                builder: (context, value, child) {
+                  return GridView.builder(
+                    padding: const EdgeInsets.all(0),
+                    physics: const NeverScrollableScrollPhysics(),
+                    shrinkWrap: true,
+                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 4,
+                      // mainAxisSpacing: 8,
+                      crossAxisSpacing: 8,
+                      childAspectRatio: 1,
+                    ),
+                    itemCount: avatars.length,
+                    itemBuilder: (context, index) {
+                      if (avatarPick.value == avatars[index]) {
+                        return GestureDetector(
+                          onTap: () {},
+                          child: Container(
+                            decoration: BoxDecoration(
+                              border: Border.all(color: Colors.black),
+                              borderRadius: BorderRadius.circular(7),
+                            ),
+                            child: Image.asset('images/${avatarPick.value}'),
+                          ),
+                        );
+                      } else {
+                        return GestureDetector(
+                          onTap: () {
+                            avatarPick.value = avatars[index];
+                          },
+                          child: Image.asset('images/${avatars[index]}'),
+                        );
+                      }
                     },
+                  );
+                },
+              ),
+              const SizedBox(height: 20),
+              // avatar
+
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      textStyle: const TextStyle(fontWeight: FontWeight.bold),
+                      backgroundColor: Colors.grey,
+                      foregroundColor: Colors.white,
+                    ),
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    child: const Text('取消'),
                   ),
-                ),
-                // avatar
-
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Color.fromARGB(255, 113, 111, 111),
-                        foregroundColor: Colors.white,
-                      ),
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
-                      child: Text('取消'),
+                  const SizedBox(width: 30),
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      textStyle: const TextStyle(fontWeight: FontWeight.bold),
+                      backgroundColor: Colors.green,
+                      foregroundColor: Colors.white,
                     ),
-                    SizedBox(width: 30),
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Color.fromARGB(255, 10, 132, 10),
-                        foregroundColor: Colors.white,
-                      ),
-                      onPressed: () {
-                        String input = nameController.text;
-                        if (input == '') {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text(
-                                '请输入昵称',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 16,
-                                ),
+                    onPressed: () {
+                      String input = nameController.text;
+                      if (input == '') {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                              '请输入昵称',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
                               ),
-                              backgroundColor: Color.fromARGB(255, 205, 50, 36),
-                              duration: Durations.long3,
                             ),
-                          );
-                          return;
-                        }
-                        if (avatarPick.value == '') {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text(
-                                '请选择头像',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 16,
-                                ),
+                            backgroundColor: Color.fromARGB(255, 205, 50, 36),
+                            duration: Durations.long3,
+                          ),
+                        );
+                        return;
+                      }
+                      if (avatarPick.value == '') {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                              '请选择头像',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
                               ),
-                              backgroundColor: Color.fromARGB(255, 205, 50, 36),
-                              duration: Durations.long3,
                             ),
-                          );
-                          return;
-                        }
+                            backgroundColor: Color.fromARGB(255, 205, 50, 36),
+                            duration: Durations.long3,
+                          ),
+                        );
+                        return;
+                      }
 
-                        if (id == null) {
-                          createTripUser(input);
-                        } else {
-                          updateTripUser(input);
-                        }
-                        Navigator.pop(context, true);
-                      },
-                      child: Text('确认'),
-                    ),
-                  ],
-                ),
-                SizedBox(height: 10),
-              ],
-            ),
+                      if (id == null) {
+                        createTripUser(input);
+                      } else {
+                        updateTripUser(input);
+                      }
+                      Navigator.pop(context, true);
+                    },
+                    child: const Text('确认'),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+            ],
           ),
         ),
       ),

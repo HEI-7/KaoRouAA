@@ -46,7 +46,7 @@ class MyHomePage extends StatelessWidget {
           style: TextStyle(fontSize: 20),
         ),
       ),
-      body: SafeArea(child: TripListPage()),
+      body: const SafeArea(child: TripListPage()),
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.only(left: 20, right: 20, bottom: 20),
         child: ElevatedButton.icon(
