@@ -238,11 +238,14 @@ class _TripUserListPageState extends State<TripUserListPage> {
       barrierDismissible: false,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('注意'),
+          title: const Text(
+            '注意',
+            style: TextStyle(fontSize: 20, color: Colors.red),
+          ),
           content: const SingleChildScrollView(
             child: ListBody(
               children: <Widget>[
-                Text('该成员存在 AA 流水!'),
+                Text('该团员存在 AA 流水!'),
                 SizedBox(height: 10),
                 Text('请修改相关流水后再删除!'),
               ],

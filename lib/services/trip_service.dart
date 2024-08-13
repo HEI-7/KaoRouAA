@@ -83,32 +83,19 @@ class TripProvider extends DBProvider {
     // 判断能否删除
     final List results = await db.rawQuery(
       """
-        select * from trip_bill_detail where userId = ? and billId not in (
-          select id from trip_bill where userId = ?
-        )
+        select * from trip_bill_detail where userId = ?
       """,
-      [id, id],
+      [id],
     );
     if (results.isNotEmpty) {
       return false;
     }
 
-    final batch = db.batch();
-    batch.rawDelete(
-      'delete from trip_bill_detail where userId = ?',
-      [id],
-    );
-    batch.rawDelete(
-      'delete from trip_bill where userId = ?',
-      [id],
-    );
-    batch.delete(
+    await db.delete(
       'trip_user',
       where: 'id = ?',
       whereArgs: [id],
     );
-
-    await batch.commit();
     return true;
   }
 
