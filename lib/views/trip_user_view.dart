@@ -10,9 +10,13 @@ class TripUserListPage extends StatefulWidget {
   const TripUserListPage({
     super.key,
     required this.tripId,
+    required this.refresh,
+    required this.onChanged,
   });
 
   final int tripId;
+  final bool refresh;
+  final ValueChanged<bool> onChanged;
 
   @override
   State<TripUserListPage> createState() => _TripUserListPageState();
@@ -24,6 +28,8 @@ class _TripUserListPageState extends State<TripUserListPage> {
   // bool refresh = false;
 
   refreshTripUserList() async {
+    print(widget.refresh);
+
     // 计算
     // if (refresh) {
     //   await TripProvider().calculateTripBillToUser(widget.tripId);
@@ -31,6 +37,8 @@ class _TripUserListPageState extends State<TripUserListPage> {
     await TripProvider().calculateTripBillToUser(widget.tripId);
     payAct = await TripProvider().queryTripPay(widget.tripId);
     tripUserList = TripProvider().listTripUser(widget.tripId);
+
+    widget.onChanged(!widget.refresh);
 
     print(1);
     // refresh = false;
@@ -42,6 +50,10 @@ class _TripUserListPageState extends State<TripUserListPage> {
     super.initState();
     print(0);
     refreshTripUserList();
+  }
+
+  void _handleTap() {
+    widget.onChanged(!widget.refresh);
   }
 
   @override
@@ -278,7 +290,8 @@ class TripUserPage extends StatelessWidget {
   final int? id;
   final String? name;
   final String? avatar;
-  final List avatars = [
+
+  final avatars = [
     'p1.png',
     'p2.png',
     'p3.png',
@@ -292,7 +305,8 @@ class TripUserPage extends StatelessWidget {
     'p11.png',
     'p12.png',
   ];
-  final ValueNotifier<String> avatarPick = ValueNotifier<String>('');
+  final avatarPick = ValueNotifier<String>('');
+  final nameController = TextEditingController();
 
   void createTripUser(String input) async {
     var tripUser = TripUser(id: id, tripId: tripId, name: input, avatar: avatarPick.value);
@@ -311,7 +325,6 @@ class TripUserPage extends StatelessWidget {
       desc = '修改团员';
     }
 
-    var nameController = TextEditingController();
     if (name != null) {
       nameController.text = name!;
     }

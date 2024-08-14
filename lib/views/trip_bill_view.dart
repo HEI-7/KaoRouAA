@@ -18,9 +18,13 @@ class TripBillListPage extends StatefulWidget {
   const TripBillListPage({
     super.key,
     required this.tripId,
+    required this.refresh,
+    required this.onChanged,
   });
 
   final int tripId;
+  final bool refresh;
+  final ValueChanged<bool> onChanged;
 
   @override
   State<TripBillListPage> createState() => _TripBillListPageState();

@@ -426,15 +426,23 @@ class TripDetailPage extends StatefulWidget {
 class _TripDetailPageState extends State<TripDetailPage> {
   int selectedIndex = 0;
 
+  bool _refresh = false;
+  void _handleRefreshChanged(bool newValue) {
+    _refresh = newValue;
+    // setState(() {
+    //   _refresh = newValue;
+    // });
+  }
+
   @override
   Widget build(BuildContext context) {
     Widget page;
     switch (selectedIndex) {
       case 0:
-        page = TripUserListPage(tripId: widget.tripId);
+        page = TripUserListPage(tripId: widget.tripId, refresh: _refresh, onChanged: _handleRefreshChanged);
         break;
       case 1:
-        page = TripBillListPage(tripId: widget.tripId);
+        page = TripBillListPage(tripId: widget.tripId, refresh: _refresh, onChanged: _handleRefreshChanged);
         break;
       default:
         throw UnimplementedError('no widget for $selectedIndex');
