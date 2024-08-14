@@ -24,36 +24,22 @@ class TripUserListPage extends StatefulWidget {
 
 class _TripUserListPageState extends State<TripUserListPage> {
   Future? tripUserList;
-  double payAct = 0.00;
-  // bool refresh = false;
+  double? payAct;
+  bool refreshList = true;
 
   refreshTripUserList() async {
-    print(widget.refresh);
+    // debugPrint(widget.refresh.toString());
+    if (!widget.refresh) {
+      // 重新计算
+      await TripProvider().calculateTripBillToUser(widget.tripId);
+      widget.onChanged(true);
+    }
 
-    // 计算
-    // if (refresh) {
-    //   await TripProvider().calculateTripBillToUser(widget.tripId);
-    // }
-    await TripProvider().calculateTripBillToUser(widget.tripId);
-    payAct = await TripProvider().queryTripPay(widget.tripId);
-    tripUserList = TripProvider().listTripUser(widget.tripId);
-
-    widget.onChanged(!widget.refresh);
-
-    print(1);
-    // refresh = false;
-    setState(() {});
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    print(0);
-    refreshTripUserList();
-  }
-
-  void _handleTap() {
-    widget.onChanged(!widget.refresh);
+    payAct ??= await TripProvider().queryTripPay(widget.tripId);
+    if (refreshList) {
+      tripUserList = TripProvider().listTripUser(widget.tripId);
+    }
+    return tripUserList;
   }
 
   @override
@@ -73,7 +59,9 @@ class _TripUserListPageState extends State<TripUserListPage> {
                   MaterialPageRoute(builder: (context) => TripUserPage(tripId: widget.tripId)),
                 ).then((refreshFlag) {
                   if (refreshFlag == true) {
-                    refreshTripUserList();
+                    setState(() {
+                      refreshList = true;
+                    });
                   }
                 });
               },
@@ -87,7 +75,7 @@ class _TripUserListPageState extends State<TripUserListPage> {
 
   Widget tripUserListWidget() {
     return FutureBuilder(
-      future: tripUserList,
+      future: refreshTripUserList(),
       builder: (BuildContext context, AsyncSnapshot snapshot) {
         if (snapshot.hasData) {
           if (snapshot.data!.isEmpty) {
@@ -113,7 +101,7 @@ class _TripUserListPageState extends State<TripUserListPage> {
                     child: Padding(
                       padding: const EdgeInsets.all(15),
                       child: Text(
-                        '总计 ${payAct.toStringAsFixed(2)}',
+                        '总计 ${payAct!.toStringAsFixed(2)}',
                         style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                       ),
                     ),
@@ -138,7 +126,9 @@ class _TripUserListPageState extends State<TripUserListPage> {
                         if (delete == true) {
                           if (await TripProvider().deleteTripUserCascade(item.id)) {
                             snapshot.data.remove(item);
-                            setState(() {});
+                            setState(() {
+                              refreshList = false;
+                            });
                           } else {
                             _showErrorDialog();
                           }
@@ -163,7 +153,9 @@ class _TripUserListPageState extends State<TripUserListPage> {
                       ),
                     ).then((refreshFlag) {
                       if (refreshFlag == true) {
-                        refreshTripUserList();
+                        setState(() {
+                          refreshList = true;
+                        });
                       }
                     });
                   },
