@@ -347,6 +347,13 @@ class _TripBillPageState extends State<TripBillPage> {
     '其他',
   ];
 
+  // 用户
+  Future? tripUserList;
+  refreshTripUserList() async {
+    tripUserList ??= TripProvider().listTripUser(widget.tripId);
+    return tripUserList;
+  }
+
   void createTripBill(String payInput, String datePicker, String remarkInput) async {
     var tripBill = TripBill(
       // id: widget.id,
@@ -483,19 +490,28 @@ class _TripBillPageState extends State<TripBillPage> {
         child: Padding(
           padding: const EdgeInsets.all(15),
           child: FutureBuilder(
-            future: TripProvider().listTripUser(widget.tripId),
+            future: refreshTripUserList(),
             builder: (BuildContext context, AsyncSnapshot snapshot) {
               if (snapshot.hasData) {
+                if (snapshot.data!.isEmpty) {
+                  return const Center(
+                    child: Text(
+                      '\n\n请先返回添加团员\n\n',
+                      style: TextStyle(fontSize: 20),
+                    ),
+                  );
+                }
+
                 return Column(
                   children: [
                     StatefulBuilder(
                       builder: (BuildContext context, StateSetter setState) {
                         return DropdownButtonFormField(
-                          decoration: InputDecoration(
+                          decoration: const InputDecoration(
                             prefixIcon: Icon(Icons.person),
-                            labelText: '成员',
+                            labelText: '团员',
                           ),
-                          hint: Text('请选择付款人'),
+                          hint: const Text('请选择付款人'),
                           items: snapshot.data.map<DropdownMenuItem<int>>((TripUser tripUser) {
                             return DropdownMenuItem(
                               value: tripUser.id,
@@ -511,12 +527,11 @@ class _TripBillPageState extends State<TripBillPage> {
                         );
                       },
                     ),
-                    SizedBox(height: 10),
+                    const SizedBox(height: 10),
                     TextField(
                       maxLength: 10,
-                      // autofocus: true,
                       controller: payController,
-                      decoration: InputDecoration(
+                      decoration: const InputDecoration(
                         labelText: '金额',
                         hintText: '请输入金额',
                         prefixIcon: Icon(Icons.money),
@@ -527,11 +542,10 @@ class _TripBillPageState extends State<TripBillPage> {
                         FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
                       ],
                     ),
-                    SizedBox(height: 10),
+                    const SizedBox(height: 10),
                     TextField(
-                      // autofocus: true,
                       controller: dateController,
-                      decoration: InputDecoration(
+                      decoration: const InputDecoration(
                         labelText: '日期',
                         hintText: '请选择日期',
                         prefixIcon: Icon(Icons.date_range),
@@ -547,7 +561,7 @@ class _TripBillPageState extends State<TripBillPage> {
                           initialDate: dateNow,
                           firstDate: DateTime(2020, 01),
                           lastDate: DateTime(2050, 12),
-                          locale: Locale('zh'),
+                          locale: const Locale('zh'),
                         );
                         if (result != null) {
                           dateController.text = result.toString().substring(0, 10);
@@ -555,15 +569,15 @@ class _TripBillPageState extends State<TripBillPage> {
                       },
                       readOnly: true,
                     ),
-                    SizedBox(height: 10),
+                    const SizedBox(height: 10),
                     StatefulBuilder(
                       builder: (BuildContext context, StateSetter setState) {
                         return DropdownButtonFormField(
-                          decoration: InputDecoration(
+                          decoration: const InputDecoration(
                             prefixIcon: Icon(Icons.category),
                             labelText: '类型',
                           ),
-                          hint: Text('请选择类型'),
+                          hint: const Text('请选择类型'),
                           items: types.map<DropdownMenuItem<String>>((String value) {
                             return DropdownMenuItem(
                               value: value,
@@ -579,54 +593,80 @@ class _TripBillPageState extends State<TripBillPage> {
                         );
                       },
                     ),
-                    SizedBox(height: 10),
+                    const SizedBox(height: 10),
                     TextField(
                       maxLength: 20,
-                      // autofocus: true,
                       controller: remarkController,
-                      decoration: InputDecoration(
+                      decoration: const InputDecoration(
                         labelText: '备注',
                         hintText: '请输入备注（选填）',
                         prefixIcon: Icon(Icons.note),
                       ),
                     ),
-                    SizedBox(height: 10),
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: Text(
-                        '选择成员来AA',
-                        style: TextStyle(
-                          color: const Color.fromARGB(255, 205, 50, 36),
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                    SizedBox(height: 10),
-                    SizedBox(
-                      child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
-                        return GridView.builder(
-                          physics: NeverScrollableScrollPhysics(),
-                          shrinkWrap: true,
-                          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 4,
-                            mainAxisSpacing: 8,
-                            crossAxisSpacing: 8,
-                            childAspectRatio: 1.0,
-                          ),
-                          itemCount: snapshot.data.length,
-                          itemBuilder: (context, index) {
-                            if (_selectUserAA.contains(snapshot.data[index].id)) {
-                              return GestureDetector(
-                                onTap: () {
-                                  setState(() {
-                                    _selectUserAA.remove(snapshot.data[index].id);
-                                  });
+                    const SizedBox(height: 10),
+                    StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+                      return Column(
+                        children: [
+                          Row(
+                            children: [
+                              TextButton.icon(
+                                icon: const Icon(Icons.person_add),
+                                label: const Text("选择 AA 的团员"),
+                                onPressed: () {},
+                              ),
+                              TextButton(
+                                child: const Text('全选', style: TextStyle(color: Colors.blue)),
+                                onPressed: () {
+                                  _selectUserAA = [];
+                                  for (final obj in snapshot.data) {
+                                    _selectUserAA.add(obj.id);
+                                  }
+                                  setState(() {});
                                 },
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    border: Border.all(color: Colors.black),
-                                    borderRadius: BorderRadius.circular(7),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 10),
+                          GridView.builder(
+                            padding: const EdgeInsets.all(0),
+                            physics: const NeverScrollableScrollPhysics(),
+                            shrinkWrap: true,
+                            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 4,
+                              mainAxisSpacing: 8,
+                              crossAxisSpacing: 8,
+                              childAspectRatio: 1,
+                            ),
+                            itemCount: snapshot.data.length,
+                            itemBuilder: (context, index) {
+                              if (_selectUserAA.contains(snapshot.data[index].id)) {
+                                return GestureDetector(
+                                  onTap: () {
+                                    setState(() {
+                                      _selectUserAA.remove(snapshot.data[index].id);
+                                    });
+                                  },
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      border: Border.all(color: Colors.black),
+                                      borderRadius: BorderRadius.circular(7),
+                                    ),
+                                    child: Column(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        Image.asset('images/${snapshot.data[index].avatar}'),
+                                        Text(snapshot.data[index].name),
+                                      ],
+                                    ),
                                   ),
+                                );
+                              } else {
+                                return GestureDetector(
+                                  onTap: () {
+                                    setState(() {
+                                      _selectUserAA.add(snapshot.data[index].id);
+                                    });
+                                  },
                                   child: Column(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
@@ -634,45 +674,21 @@ class _TripBillPageState extends State<TripBillPage> {
                                       Text(snapshot.data[index].name),
                                     ],
                                   ),
-                                ),
-                              );
-                            } else {
-                              return GestureDetector(
-                                onTap: () {
-                                  setState(() {
-                                    _selectUserAA.add(snapshot.data[index].id);
-                                  });
-                                },
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Image.asset('images/${snapshot.data[index].avatar}'),
-                                    Text(snapshot.data[index].name),
-                                  ],
-                                ),
-                              );
-                            }
-                          },
-                        );
-                      }),
-                    ),
+                                );
+                              }
+                            },
+                          ),
+                        ],
+                      );
+                    }),
+                    const SizedBox(height: 20),
                     Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        // ElevatedButton(
-                        //   style: ElevatedButton.styleFrom(
-                        //     backgroundColor: Color.fromARGB(255, 113, 111, 111),
-                        //     foregroundColor: Colors.white,
-                        //   ),
-                        //   onPressed: () {
-                        //     Navigator.pop(context);
-                        //   },
-                        //   child: Text('取消'),
-                        // ),
-                        // SizedBox(width: 30),
                         ElevatedButton(
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Color.fromARGB(255, 10, 132, 10),
+                            textStyle: const TextStyle(fontWeight: FontWeight.bold),
+                            backgroundColor: Colors.green,
                             foregroundColor: Colors.white,
                           ),
                           onPressed: () {
@@ -680,12 +696,13 @@ class _TripBillPageState extends State<TripBillPage> {
                               Navigator.pop(context, true);
                             }
                           },
-                          child: Text('确认'),
+                          child: const Text('确认'),
                         ),
-                        SizedBox(width: 30),
+                        const SizedBox(width: 30),
                         ElevatedButton(
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Color.fromARGB(255, 205, 50, 36),
+                            textStyle: const TextStyle(fontWeight: FontWeight.bold),
+                            backgroundColor: Colors.blue,
                             foregroundColor: Colors.white,
                           ),
                           onPressed: () {
@@ -693,14 +710,14 @@ class _TripBillPageState extends State<TripBillPage> {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
                                   content: Text(
-                                    '新增成功',
+                                    '保存成功',
                                     textAlign: TextAlign.center,
                                     style: TextStyle(
                                       color: Colors.white,
                                       fontSize: 16,
                                     ),
                                   ),
-                                  backgroundColor: Color.fromARGB(255, 10, 132, 10),
+                                  backgroundColor: Colors.green,
                                   duration: Durations.long3,
                                 ),
                               );
@@ -712,15 +729,15 @@ class _TripBillPageState extends State<TripBillPage> {
                               });
                             }
                           },
-                          child: Text('保存并再记一笔'),
+                          child: const Text('保存并再记一笔'),
                         ),
                       ],
                     ),
-                    SizedBox(height: 10),
+                    const SizedBox(height: 10),
                   ],
                 );
               } else {
-                return Center(child: CircularProgressIndicator());
+                return const Center(child: CircularProgressIndicator());
               }
             },
           ),
