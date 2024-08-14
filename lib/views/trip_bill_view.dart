@@ -18,11 +18,13 @@ class TripBillListPage extends StatefulWidget {
   const TripBillListPage({
     super.key,
     required this.tripId,
+    required this.userId,
     required this.refresh,
     required this.onChanged,
   });
 
   final int tripId;
+  final int userId;
   final bool refresh;
   final ValueChanged<bool> onChanged;
 

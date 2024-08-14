@@ -442,7 +442,7 @@ class _TripDetailPageState extends State<TripDetailPage> {
         page = TripUserListPage(tripId: widget.tripId, refresh: _refresh, onChanged: _handleRefreshChanged);
         break;
       case 1:
-        page = TripBillListPage(tripId: widget.tripId, refresh: _refresh, onChanged: _handleRefreshChanged);
+        page = TripBillListPage(tripId: widget.tripId, refresh: _refresh, onChanged: _handleRefreshChanged, userId: 0);
         break;
       default:
         throw UnimplementedError('no widget for $selectedIndex');
@@ -476,6 +476,7 @@ class _TripDetailPageState extends State<TripDetailPage> {
             label: '流水',
           ),
         ],
+        selectedItemColor: const Color.fromARGB(255, 205, 50, 36),
       ),
     );
   }
