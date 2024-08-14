@@ -309,7 +309,7 @@ class _TripBillListPageState extends State<TripBillListPage> {
 }
 
 class TripBillPage extends StatefulWidget {
-  TripBillPage({
+  const TripBillPage({
     super.key,
     required this.tripId,
     this.id,
@@ -329,17 +329,16 @@ class TripBillPage extends StatefulWidget {
   final String? type; // 分类
   final String? remark; // 备注
   final String? aaUsers; // 用户
+
   @override
   State<TripBillPage> createState() => _TripBillPageState();
 }
 
 class _TripBillPageState extends State<TripBillPage> {
   bool _oneMore = false;
-  String? _oldUserAA;
   int? _selectUserId; // 付款
   String? _selectType; // 分类
   List<int> _selectUserAA = []; // 用户
-
   final List<String> types = [
     '餐饮',
     '住宿',
@@ -364,7 +363,7 @@ class _TripBillPageState extends State<TripBillPage> {
     updateTripBillDetail(id, double.parse(payInput));
   }
 
-  void updateTripBill(String payInput, String datePicker, String remarkInput, double pay) async {
+  void updateTripBill(String payInput, String datePicker, String remarkInput) async {
     var tripBill = TripBill(
       id: widget.id,
       tripId: widget.tripId,
@@ -377,14 +376,14 @@ class _TripBillPageState extends State<TripBillPage> {
     );
 
     await TripProvider().updateTripBill(tripBill);
-    if (_oldUserAA != _selectUserAA.join(',') || pay != double.parse(payInput)) {
+    if (widget.aaUsers != _selectUserAA.join(',') || widget.pay != double.parse(payInput)) {
       updateTripBillDetail(widget.id!, double.parse(payInput));
     }
   }
 
   // 创建 更新 明细
   void updateTripBillDetail(int billId, double pay) async {
-    double payAA = double.parse((pay / _selectUserAA.length).toStringAsFixed(2)); // 平摊
+    double payAA = pay / _selectUserAA.length; // 平摊
     List<TripBillDetail> objs = _selectUserAA.map<TripBillDetail>((int userId) {
       return TripBillDetail(
         billId: billId,
@@ -416,7 +415,6 @@ class _TripBillPageState extends State<TripBillPage> {
     if (widget.remark != null && !_oneMore) {
       remarkController.text = widget.remark!;
     }
-    _oldUserAA = widget.aaUsers; // 用户
     if (widget.aaUsers != null && widget.aaUsers != '' && !_oneMore) {
       _selectUserAA = widget.aaUsers!.split(',').map(int.parse).toList();
     }
@@ -465,184 +463,170 @@ class _TripBillPageState extends State<TripBillPage> {
       }
       _selectUserAA.sort();
 
-      // payInput = double.parse(payInput).toStringAsFixed(2);
       if (widget.id == null || _oneMore) {
         createTripBill(payInput, datePicker, remarkInput);
       } else {
-        updateTripBill(payInput, datePicker, remarkInput, widget.pay!);
+        updateTripBill(payInput, datePicker, remarkInput);
       }
       return true;
     }
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(desc),
+        centerTitle: true,
+        title: Text(
+          desc,
+          style: const TextStyle(fontSize: 20),
+        ),
       ),
       body: SingleChildScrollView(
-        child: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(15.0),
-            child: FutureBuilder(
-              future: TripProvider().listTripUser(widget.tripId),
-              builder: (BuildContext context, AsyncSnapshot snapshot) {
-                if (snapshot.hasData) {
-                  return Column(
-                    children: [
-                      StatefulBuilder(
-                        builder: (BuildContext context, StateSetter setState) {
-                          return DropdownButtonFormField(
-                            decoration: InputDecoration(
-                              prefixIcon: Icon(Icons.person),
-                              labelText: '成员',
-                            ),
-                            hint: Text('请选择付款人'),
-                            items: snapshot.data.map<DropdownMenuItem<int>>((TripUser tripUser) {
-                              return DropdownMenuItem(
-                                value: tripUser.id,
-                                child: Text(tripUser.name),
-                              );
-                            }).toList(),
-                            value: _selectUserId,
-                            onChanged: (newValue) {
-                              setState(() {
-                                _selectUserId = newValue;
-                              });
-                            },
-                          );
-                        },
-                      ),
-                      SizedBox(height: 10),
-                      TextField(
-                        maxLength: 10,
-                        // autofocus: true,
-                        controller: payController,
-                        decoration: InputDecoration(
-                          labelText: '金额',
-                          hintText: '请输入金额',
-                          prefixIcon: Icon(Icons.money),
-                          counterText: '',
-                        ),
-                        keyboardType: TextInputType.number,
-                        inputFormatters: [
-                          FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
-                        ],
-                      ),
-                      SizedBox(height: 10),
-                      TextField(
-                        // autofocus: true,
-                        controller: dateController,
-                        decoration: InputDecoration(
-                          labelText: '日期',
-                          hintText: '请选择日期',
-                          prefixIcon: Icon(Icons.date_range),
-                        ),
-                        onTap: () async {
-                          var dateNow = DateTime.now();
-                          if (dateController.text != '') {
-                            dateNow = DateTime.parse(dateController.text);
-                          }
-
-                          final result = await showDatePicker(
-                            context: context,
-                            initialDate: dateNow,
-                            firstDate: DateTime(2020, 01),
-                            lastDate: DateTime(2050, 12),
-                            locale: Locale('zh'),
-                          );
-                          if (result != null) {
-                            dateController.text = result.toString().substring(0, 10);
-                          }
-                        },
-                        readOnly: true,
-                      ),
-                      SizedBox(height: 10),
-                      StatefulBuilder(
-                        builder: (BuildContext context, StateSetter setState) {
-                          return DropdownButtonFormField(
-                            decoration: InputDecoration(
-                              prefixIcon: Icon(Icons.category),
-                              labelText: '类型',
-                            ),
-                            hint: Text('请选择类型'),
-                            items: types.map<DropdownMenuItem<String>>((String value) {
-                              return DropdownMenuItem(
-                                value: value,
-                                child: Text(value),
-                              );
-                            }).toList(),
-                            value: _selectType,
-                            onChanged: (newValue) {
-                              setState(() {
-                                _selectType = newValue;
-                              });
-                            },
-                          );
-                        },
-                      ),
-                      SizedBox(height: 10),
-                      TextField(
-                        maxLength: 20,
-                        // autofocus: true,
-                        controller: remarkController,
-                        decoration: InputDecoration(
-                          labelText: '备注',
-                          hintText: '请输入备注（选填）',
-                          prefixIcon: Icon(Icons.note),
-                        ),
-                      ),
-                      SizedBox(height: 10),
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          '选择成员来AA',
-                          style: TextStyle(
-                            color: const Color.fromARGB(255, 205, 50, 36),
-                            fontWeight: FontWeight.bold,
+        child: Padding(
+          padding: const EdgeInsets.all(15),
+          child: FutureBuilder(
+            future: TripProvider().listTripUser(widget.tripId),
+            builder: (BuildContext context, AsyncSnapshot snapshot) {
+              if (snapshot.hasData) {
+                return Column(
+                  children: [
+                    StatefulBuilder(
+                      builder: (BuildContext context, StateSetter setState) {
+                        return DropdownButtonFormField(
+                          decoration: InputDecoration(
+                            prefixIcon: Icon(Icons.person),
+                            labelText: '成员',
                           ),
+                          hint: Text('请选择付款人'),
+                          items: snapshot.data.map<DropdownMenuItem<int>>((TripUser tripUser) {
+                            return DropdownMenuItem(
+                              value: tripUser.id,
+                              child: Text(tripUser.name),
+                            );
+                          }).toList(),
+                          value: _selectUserId,
+                          onChanged: (newValue) {
+                            setState(() {
+                              _selectUserId = newValue;
+                            });
+                          },
+                        );
+                      },
+                    ),
+                    SizedBox(height: 10),
+                    TextField(
+                      maxLength: 10,
+                      // autofocus: true,
+                      controller: payController,
+                      decoration: InputDecoration(
+                        labelText: '金额',
+                        hintText: '请输入金额',
+                        prefixIcon: Icon(Icons.money),
+                        counterText: '',
+                      ),
+                      keyboardType: TextInputType.number,
+                      inputFormatters: [
+                        FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
+                      ],
+                    ),
+                    SizedBox(height: 10),
+                    TextField(
+                      // autofocus: true,
+                      controller: dateController,
+                      decoration: InputDecoration(
+                        labelText: '日期',
+                        hintText: '请选择日期',
+                        prefixIcon: Icon(Icons.date_range),
+                      ),
+                      onTap: () async {
+                        var dateNow = DateTime.now();
+                        if (dateController.text != '') {
+                          dateNow = DateTime.parse(dateController.text);
+                        }
+
+                        final result = await showDatePicker(
+                          context: context,
+                          initialDate: dateNow,
+                          firstDate: DateTime(2020, 01),
+                          lastDate: DateTime(2050, 12),
+                          locale: Locale('zh'),
+                        );
+                        if (result != null) {
+                          dateController.text = result.toString().substring(0, 10);
+                        }
+                      },
+                      readOnly: true,
+                    ),
+                    SizedBox(height: 10),
+                    StatefulBuilder(
+                      builder: (BuildContext context, StateSetter setState) {
+                        return DropdownButtonFormField(
+                          decoration: InputDecoration(
+                            prefixIcon: Icon(Icons.category),
+                            labelText: '类型',
+                          ),
+                          hint: Text('请选择类型'),
+                          items: types.map<DropdownMenuItem<String>>((String value) {
+                            return DropdownMenuItem(
+                              value: value,
+                              child: Text(value),
+                            );
+                          }).toList(),
+                          value: _selectType,
+                          onChanged: (newValue) {
+                            setState(() {
+                              _selectType = newValue;
+                            });
+                          },
+                        );
+                      },
+                    ),
+                    SizedBox(height: 10),
+                    TextField(
+                      maxLength: 20,
+                      // autofocus: true,
+                      controller: remarkController,
+                      decoration: InputDecoration(
+                        labelText: '备注',
+                        hintText: '请输入备注（选填）',
+                        prefixIcon: Icon(Icons.note),
+                      ),
+                    ),
+                    SizedBox(height: 10),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        '选择成员来AA',
+                        style: TextStyle(
+                          color: const Color.fromARGB(255, 205, 50, 36),
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
-                      SizedBox(height: 10),
-                      SizedBox(
-                        child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
-                          return GridView.builder(
-                            physics: NeverScrollableScrollPhysics(),
-                            shrinkWrap: true,
-                            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 4,
-                              mainAxisSpacing: 8,
-                              crossAxisSpacing: 8,
-                              childAspectRatio: 1.0,
-                            ),
-                            itemCount: snapshot.data.length,
-                            itemBuilder: (context, index) {
-                              if (_selectUserAA.contains(snapshot.data[index].id)) {
-                                return GestureDetector(
-                                  onTap: () {
-                                    setState(() {
-                                      _selectUserAA.remove(snapshot.data[index].id);
-                                    });
-                                  },
-                                  child: Container(
-                                    decoration: BoxDecoration(
-                                      border: Border.all(color: Colors.black),
-                                      borderRadius: BorderRadius.circular(7),
-                                    ),
-                                    child: Column(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: [
-                                        Image.asset('images/${snapshot.data[index].avatar}'),
-                                        Text(snapshot.data[index].name),
-                                      ],
-                                    ),
+                    ),
+                    SizedBox(height: 10),
+                    SizedBox(
+                      child: StatefulBuilder(builder: (BuildContext context, StateSetter setState) {
+                        return GridView.builder(
+                          physics: NeverScrollableScrollPhysics(),
+                          shrinkWrap: true,
+                          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 4,
+                            mainAxisSpacing: 8,
+                            crossAxisSpacing: 8,
+                            childAspectRatio: 1.0,
+                          ),
+                          itemCount: snapshot.data.length,
+                          itemBuilder: (context, index) {
+                            if (_selectUserAA.contains(snapshot.data[index].id)) {
+                              return GestureDetector(
+                                onTap: () {
+                                  setState(() {
+                                    _selectUserAA.remove(snapshot.data[index].id);
+                                  });
+                                },
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    border: Border.all(color: Colors.black),
+                                    borderRadius: BorderRadius.circular(7),
                                   ),
-                                );
-                              } else {
-                                return GestureDetector(
-                                  onTap: () {
-                                    setState(() {
-                                      _selectUserAA.add(snapshot.data[index].id);
-                                    });
-                                  },
                                   child: Column(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
@@ -650,80 +634,95 @@ class _TripBillPageState extends State<TripBillPage> {
                                       Text(snapshot.data[index].name),
                                     ],
                                   ),
-                                );
-                              }
-                            },
-                          );
-                        }),
-                      ),
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          // ElevatedButton(
-                          //   style: ElevatedButton.styleFrom(
-                          //     backgroundColor: Color.fromARGB(255, 113, 111, 111),
-                          //     foregroundColor: Colors.white,
-                          //   ),
-                          //   onPressed: () {
-                          //     Navigator.pop(context);
-                          //   },
-                          //   child: Text('取消'),
-                          // ),
-                          // SizedBox(width: 30),
-                          ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Color.fromARGB(255, 10, 132, 10),
-                              foregroundColor: Colors.white,
-                            ),
-                            onPressed: () {
-                              if (saveOrUpdate()) {
-                                Navigator.pop(context, true);
-                              }
-                            },
-                            child: Text('确认'),
+                                ),
+                              );
+                            } else {
+                              return GestureDetector(
+                                onTap: () {
+                                  setState(() {
+                                    _selectUserAA.add(snapshot.data[index].id);
+                                  });
+                                },
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Image.asset('images/${snapshot.data[index].avatar}'),
+                                    Text(snapshot.data[index].name),
+                                  ],
+                                ),
+                              );
+                            }
+                          },
+                        );
+                      }),
+                    ),
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        // ElevatedButton(
+                        //   style: ElevatedButton.styleFrom(
+                        //     backgroundColor: Color.fromARGB(255, 113, 111, 111),
+                        //     foregroundColor: Colors.white,
+                        //   ),
+                        //   onPressed: () {
+                        //     Navigator.pop(context);
+                        //   },
+                        //   child: Text('取消'),
+                        // ),
+                        // SizedBox(width: 30),
+                        ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Color.fromARGB(255, 10, 132, 10),
+                            foregroundColor: Colors.white,
                           ),
-                          SizedBox(width: 30),
-                          ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Color.fromARGB(255, 205, 50, 36),
-                              foregroundColor: Colors.white,
-                            ),
-                            onPressed: () {
-                              if (saveOrUpdate()) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text(
-                                      '新增成功',
-                                      textAlign: TextAlign.center,
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 16,
-                                      ),
+                          onPressed: () {
+                            if (saveOrUpdate()) {
+                              Navigator.pop(context, true);
+                            }
+                          },
+                          child: Text('确认'),
+                        ),
+                        SizedBox(width: 30),
+                        ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Color.fromARGB(255, 205, 50, 36),
+                            foregroundColor: Colors.white,
+                          ),
+                          onPressed: () {
+                            if (saveOrUpdate()) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text(
+                                    '新增成功',
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 16,
                                     ),
-                                    backgroundColor: Color.fromARGB(255, 10, 132, 10),
-                                    duration: Durations.long3,
                                   ),
-                                );
+                                  backgroundColor: Color.fromARGB(255, 10, 132, 10),
+                                  duration: Durations.long3,
+                                ),
+                              );
 
-                                setState(() {
-                                  payController.text = '';
-                                  remarkController.text = '';
-                                  _oneMore = true;
-                                });
-                              }
-                            },
-                            child: Text('保存并再记一笔'),
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: 10),
-                    ],
-                  );
-                } else {
-                  return Center(child: CircularProgressIndicator());
-                }
-              },
-            ),
+                              setState(() {
+                                payController.text = '';
+                                remarkController.text = '';
+                                _oneMore = true;
+                              });
+                            }
+                          },
+                          child: Text('保存并再记一笔'),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 10),
+                  ],
+                );
+              } else {
+                return Center(child: CircularProgressIndicator());
+              }
+            },
           ),
         ),
       ),

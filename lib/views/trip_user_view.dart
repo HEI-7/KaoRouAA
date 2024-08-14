@@ -134,7 +134,7 @@ class _TripUserListPageState extends State<TripUserListPage> {
                           }
                         }
                       },
-                      backgroundColor: Colors.red,
+                      backgroundColor: const Color.fromARGB(255, 205, 50, 36),
                       icon: Icons.delete,
                     ),
                   ],
