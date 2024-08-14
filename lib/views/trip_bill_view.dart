@@ -14,6 +14,10 @@ Future<Map<int, String>> getTripUserMap(int tripId) async {
   return {for (var obj in tripUserList) obj.id: obj.name};
 }
 
+Future<List<TripUser>> getTripUserList(int tripId) async {
+  return await TripProvider().listTripUser(tripId);
+}
+
 class TripBillListPage extends StatefulWidget {
   const TripBillListPage({
     super.key,
@@ -35,9 +39,13 @@ class TripBillListPage extends StatefulWidget {
 class _TripBillListPageState extends State<TripBillListPage> {
   Map<int, String>? _userMap;
   Future? tripBillList;
+  List tripUserList = [];
 
   refreshTripBillList() async {
-    _userMap ??= await getTripUserMap(widget.tripId);
+    tripUserList = await getTripUserList(widget.tripId);
+    _userMap ??= {for (var obj in tripUserList!) obj.id: obj.name};
+
+    // _userMap ??= await getTripUserMap(widget.tripId);
     tripBillList = TripProvider().listTripBill(widget.tripId, 0);
     setState(() {});
   }
@@ -62,45 +70,78 @@ class _TripBillListPageState extends State<TripBillListPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        children: [
-          Container(
-            decoration: BoxDecoration(
-              border: Border(
-                bottom: BorderSide(color: Colors.grey, width: 0.5),
-              ),
-            ),
-            child: Align(
-              alignment: Alignment.bottomRight,
-              child: IconButton(
-                iconSize: 35,
-                icon: Icon(Icons.add_box),
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => TripBillPage(tripId: widget.tripId)),
-                  ).then((refreshFlag) {
+    return Column(
+      children: [
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            children: [
+              ...[
+                TextButton(
+                  style: ButtonStyle(
+                    foregroundColor: WidgetStateProperty.resolveWith<Color?>(
+                      (Set<WidgetState> states) {
+                        if (states.contains(WidgetState.selected)) {
+                          return Colors.white;
+                        }
+                        // return Colors.indigo;
+                        return null; // defer to the defaults
+                      },
+                    ),
+                    backgroundColor: WidgetStateProperty.resolveWith<Color?>(
+                      (Set<WidgetState> states) {
+                        if (states.contains(WidgetState.selected)) {
+                          return Colors.indigo;
+                        }
+                        // return Colors.indigo;
+                        return null; // defer to the defaults
+                      },
+                    ),
+                  ),
+                  child: const Text('全部'),
+                  onPressed: () {
+                    // debugPrint(0);
+                  },
+                ),
+              ],
+              ...tripUserList.map<TextButton>((obj) {
+                return TextButton(
+                  // icon: const Icon(Icons.person_add),
+                  child: Text(obj.name),
+                  onPressed: () {
+                    debugPrint(obj.id.toString());
+                  },
+                );
+              }),
+            ],
+          ),
+        ),
+        Expanded(child: tripBillListWidget()),
+        Align(
+          alignment: Alignment.centerRight,
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: FloatingActionButton.small(
+              elevation: 1,
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => TripBillPage(tripId: widget.tripId)),
+                ).then((refreshFlag) {
+                  if (refreshFlag == true) {
                     refreshTripBillList();
-                    // if (refreshFlag == true) {
-                    //   refreshTripBillList();
-                    // }
-                  });
-                },
-              ),
+                    // setState(() {
+                    //   refreshList = true;
+                    // });
+                  }
+                });
+              },
+              backgroundColor: Colors.lightBlue,
+              child: const Icon(Icons.add),
             ),
           ),
-          Expanded(
-            child: Container(
-              decoration: BoxDecoration(
-                color: Color.fromARGB(255, 240, 233, 233),
-              ),
-              child: tripBillListWidget(),
-            ),
-          ),
-          // SizedBox(height: 10),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
@@ -110,10 +151,10 @@ class _TripBillListPageState extends State<TripBillListPage> {
       builder: (BuildContext context, AsyncSnapshot snapshot) {
         if (snapshot.hasData) {
           if (snapshot.data!.isEmpty) {
-            return Center(
-              child: const Text(
+            return const Center(
+              child: Text(
                 '暂时没有流水',
-                style: TextStyle(fontSize: 20.0),
+                style: TextStyle(fontSize: 20),
               ),
             );
           }
@@ -278,7 +319,7 @@ class _TripBillListPageState extends State<TripBillListPage> {
             },
           );
         } else {
-          return Center(child: CircularProgressIndicator());
+          return const Center(child: CircularProgressIndicator());
         }
       },
     );
@@ -287,20 +328,27 @@ class _TripBillListPageState extends State<TripBillListPage> {
   Future<bool?> showDeleteConfirmDialog(String desc) {
     return showDialog<bool>(
       context: context,
+      barrierDismissible: false,
       builder: (context) {
         return AlertDialog(
-          title: Text("提示"),
+          title: const Text(
+            "提示",
+            style: TextStyle(fontSize: 20),
+          ),
           content: Text(
-            "您确定要删除该笔流水\n\n$desc",
+            "您确定要删除该笔流水\n\n$desc ？",
             textAlign: TextAlign.center,
           ),
           actions: <Widget>[
             TextButton(
-              child: Text("取消"),
+              child: const Text("取消"),
               onPressed: () => Navigator.of(context).pop(false),
             ),
             TextButton(
-              child: Text("删除"),
+              child: const Text(
+                "删除",
+                style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+              ),
               onPressed: () => Navigator.of(context).pop(true),
             ),
           ],
