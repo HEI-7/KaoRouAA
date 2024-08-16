@@ -475,10 +475,12 @@ class _TripDetailPageState extends State<TripDetailPage> {
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: selectedIndex,
         onTap: (int index) {
-          setState(() {
-            selectedIndex = index;
-            userId = 0;
-          });
+          if (index != selectedIndex) {
+            setState(() {
+              selectedIndex = index;
+              userId = 0;
+            });
+          }
         },
         items: const [
           BottomNavigationBarItem(

@@ -30,13 +30,22 @@ class TripBillListPage extends StatefulWidget {
 class _TripBillListPageState extends State<TripBillListPage> {
   Map<int, String>? _userMap;
   Future? tripBillList;
-  List tripUserList = [];
+  Future? tripUserList;
+  final List _userList = [];
   int choiceUserId = 0;
 
   refreshTripBillList(int userId) async {
-    if (tripUserList.isEmpty) {
-      tripUserList = await TripProvider().listTripUser(widget.tripId);
-      _userMap ??= {for (var obj in tripUserList) obj.id: obj.name};
+    if (_userList.isEmpty) {
+      tripUserList = TripProvider().listTripUser(widget.tripId);
+      for (final userObj in await tripUserList) {
+        final obj = TripUser(id: userObj.id, name: userObj.name);
+        if (userId == userObj.id) {
+          _userList.insert(0, obj);
+        } else {
+          _userList.add(obj);
+        }
+      }
+      _userMap ??= {for (var obj in _userList) obj.id: obj.name};
     }
 
     tripBillList = TripProvider().listTripBill(widget.tripId, userId);
@@ -68,7 +77,7 @@ class _TripBillListPageState extends State<TripBillListPage> {
     return Column(
       children: [
         FutureBuilder(
-          future: tripBillList,
+          future: tripUserList,
           builder: (BuildContext context, AsyncSnapshot snapshot) {
             if (!snapshot.hasData) {
               return const SizedBox(height: 10);
@@ -95,7 +104,7 @@ class _TripBillListPageState extends State<TripBillListPage> {
                       },
                     ),
                   ],
-                  ...tripUserList.map<TextButton>((obj) {
+                  ..._userList.map<TextButton>((obj) {
                     return TextButton(
                       style: ButtonStyle(
                         backgroundColor: WidgetStateProperty.resolveWith<Color?>(
