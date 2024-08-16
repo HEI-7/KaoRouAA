@@ -31,6 +31,7 @@ class _TripBillListPageState extends State<TripBillListPage> {
   Map<int, String>? _userMap;
   Future? tripBillList;
   List tripUserList = [];
+  int choiceUserId = 0;
 
   refreshTripBillList(int userId) async {
     if (tripUserList.isEmpty) {
@@ -39,7 +40,9 @@ class _TripBillListPageState extends State<TripBillListPage> {
     }
 
     tripBillList = TripProvider().listTripBill(widget.tripId, userId);
-    setState(() {});
+    setState(() {
+      choiceUserId = userId;
+    });
   }
 
   @override
@@ -89,6 +92,7 @@ class _TripBillListPageState extends State<TripBillListPage> {
                         return null; // defer to the defaults
                       },
                     ),
+                    overlayColor: WidgetStateProperty.all(Colors.transparent),
                   ),
                   child: const Text('全部'),
                   onPressed: () {
@@ -121,10 +125,10 @@ class _TripBillListPageState extends State<TripBillListPage> {
                   MaterialPageRoute(builder: (context) => TripBillPage(tripId: widget.tripId)),
                 ).then((refreshFlag) {
                   if (refreshFlag == true) {
+                    if (widget.refresh) {
+                      widget.onChanged(false);
+                    }
                     refreshTripBillList(0);
-                    // setState(() {
-                    //   refreshList = true;
-                    // });
                   }
                 });
               },
@@ -151,162 +155,171 @@ class _TripBillListPageState extends State<TripBillListPage> {
             );
           }
 
-          return ListView.builder(
-            itemCount: snapshot.data.length + 1,
-            itemBuilder: (context, index) {
-              if (index == snapshot.data.length) {
-                if (index > 4) {
-                  return Padding(
-                    padding: EdgeInsets.only(bottom: 15.0),
-                    child: Center(
-                      child: Text(
-                        '已经是最后一笔了',
-                        style: TextStyle(
-                          color: Color.fromARGB(255, 118, 112, 112),
-                        ),
-                      ),
-                    ),
-                  );
-                } else {
-                  return SizedBox();
-                }
-              }
-
-              var item = snapshot.data[index];
-              return Container(
-                margin: EdgeInsets.only(bottom: 10.0),
-                child: Slidable(
-                  key: ValueKey(index),
-                  endActionPane: ActionPane(
-                    motion: ScrollMotion(),
-                    extentRatio: 0.2,
-                    children: [
-                      SlidableAction(
-                        onPressed: (context) async {
-                          String payString = item.pay.toStringAsFixed(2);
-                          String desc = '${_userMap![item.userId]}在${item.date}支付的${item.type}费用\n\n$payString';
-                          bool? delete = await showDeleteConfirmDialog(desc);
-                          if (delete == true) {
-                            await TripProvider().deleteTripBillCascade(item.id);
-                            snapshot.data.remove(item);
-                            setState(() {});
-                          }
-                        },
-                        backgroundColor: Color(0xFFFE4A49),
-                        icon: Icons.delete,
-                      ),
-                    ],
-                  ),
-                  child: GestureDetector(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => TripBillPage(
-                            tripId: widget.tripId,
-                            id: item.id,
-                            userId: item.userId,
-                            pay: item.pay,
-                            date: item.date,
-                            type: item.type,
-                            remark: item.remark,
-                            aaUsers: item.aaUsers,
+          return StatefulBuilder(
+            builder: (BuildContext context, StateSetter setListState) {
+              return ListView.builder(
+                itemCount: snapshot.data.length + 1,
+                itemBuilder: (context, index) {
+                  if (index == snapshot.data.length) {
+                    if (index > 4) {
+                      return Padding(
+                        padding: EdgeInsets.only(bottom: 15.0),
+                        child: Center(
+                          child: Text(
+                            '已经是最后一笔了',
+                            style: TextStyle(
+                              color: Color.fromARGB(255, 118, 112, 112),
+                            ),
                           ),
                         ),
-                      ).then((refreshFlag) {
-                        refreshTripBillList(0);
-                        // if (refreshFlag == true) {
-                        //   refreshTripBillList();
-                        // }
-                      });
-                    },
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: Colors.white,
+                      );
+                    } else {
+                      return SizedBox();
+                    }
+                  }
+
+                  var item = snapshot.data[index];
+                  return Container(
+                    margin: EdgeInsets.only(bottom: 10.0),
+                    child: Slidable(
+                      key: ValueKey(index),
+                      endActionPane: ActionPane(
+                        motion: ScrollMotion(),
+                        extentRatio: 0.2,
+                        children: [
+                          SlidableAction(
+                            onPressed: (context) async {
+                              String payString = item.pay.toStringAsFixed(2);
+                              String desc = '${_userMap![item.userId]}在${item.date}支付的${item.type}费用\n\n$payString';
+                              bool? delete = await showDeleteConfirmDialog(desc);
+                              if (delete == true) {
+                                await TripProvider().deleteTripBillCascade(item.id);
+                                if (widget.refresh) {
+                                  widget.onChanged(false);
+                                }
+                                snapshot.data.remove(item);
+                                setListState(() {});
+                              }
+                            },
+                            backgroundColor: Color(0xFFFE4A49),
+                            icon: Icons.delete,
+                          ),
+                        ],
                       ),
-                      child: Padding(
-                        padding: EdgeInsets.only(left: 17.0, right: 17.0, top: 7.0, bottom: 7.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Container(
-                              padding: EdgeInsets.only(bottom: 7.0),
-                              decoration: BoxDecoration(
-                                border: Border(
-                                  bottom: BorderSide(color: Colors.grey, width: 0.5),
-                                ),
+                      child: GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => TripBillPage(
+                                tripId: widget.tripId,
+                                id: item.id,
+                                userId: item.userId,
+                                pay: item.pay,
+                                date: item.date,
+                                type: item.type,
+                                remark: item.remark,
+                                aaUsers: item.aaUsers,
                               ),
-                              child: Row(
-                                children: [
-                                  Text(
-                                    _userMap![item.userId]!,
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 18,
+                            ),
+                          ).then((refreshFlag) {
+                            if (refreshFlag == true) {
+                              if (widget.refresh) {
+                                widget.onChanged(false);
+                              }
+                              refreshTripBillList(0);
+                            }
+                          });
+                        },
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                          ),
+                          child: Padding(
+                            padding: EdgeInsets.only(left: 17.0, right: 17.0, top: 7.0, bottom: 7.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Container(
+                                  padding: EdgeInsets.only(bottom: 7.0),
+                                  decoration: BoxDecoration(
+                                    border: Border(
+                                      bottom: BorderSide(color: Colors.grey, width: 0.5),
                                     ),
                                   ),
-                                  Expanded(
-                                    child: Align(
-                                      alignment: Alignment.bottomRight,
-                                      child: Text(
-                                        '¥ ${item.pay.toStringAsFixed(2)}',
+                                  child: Row(
+                                    children: [
+                                      Text(
+                                        _userMap![item.userId]!,
                                         style: TextStyle(
                                           fontWeight: FontWeight.bold,
-                                          fontSize: 16,
-                                          color: Colors.red,
+                                          fontSize: 18,
+                                        ),
+                                      ),
+                                      Expanded(
+                                        child: Align(
+                                          alignment: Alignment.bottomRight,
+                                          child: Text(
+                                            '¥ ${item.pay.toStringAsFixed(2)}',
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 16,
+                                              color: Colors.red,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Container(
+                                  padding: EdgeInsets.only(top: 7.0, bottom: 5.0),
+                                  child: Row(
+                                    children: [
+                                      Text(item.type),
+                                      Expanded(
+                                        child: Align(
+                                          alignment: Alignment.bottomRight,
+                                          child: Text(item.date),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Text(
+                                  'AA：${funcAAUserNameString(item.aaUsers)}',
+                                  style: TextStyle(
+                                    color: Color.fromARGB(255, 118, 112, 112),
+                                  ),
+                                ),
+                                if (item.remark != '') ...[
+                                  Container(
+                                    margin: EdgeInsets.only(top: 7.0),
+                                    padding: EdgeInsets.only(top: 7.0),
+                                    decoration: BoxDecoration(
+                                      border: Border(
+                                        top: BorderSide(color: Colors.grey, width: 0.5),
+                                      ),
+                                    ),
+                                    child: SizedBox(
+                                      width: double.infinity,
+                                      child: Text(
+                                        '备注：${item.remark}',
+                                        style: TextStyle(
+                                          color: Color.fromARGB(255, 118, 112, 112),
                                         ),
                                       ),
                                     ),
                                   ),
                                 ],
-                              ),
+                              ],
                             ),
-                            Container(
-                              padding: EdgeInsets.only(top: 7.0, bottom: 5.0),
-                              child: Row(
-                                children: [
-                                  Text(item.type),
-                                  Expanded(
-                                    child: Align(
-                                      alignment: Alignment.bottomRight,
-                                      child: Text(item.date),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            Text(
-                              'AA：${funcAAUserNameString(item.aaUsers)}',
-                              style: TextStyle(
-                                color: Color.fromARGB(255, 118, 112, 112),
-                              ),
-                            ),
-                            if (item.remark != '') ...[
-                              Container(
-                                margin: EdgeInsets.only(top: 7.0),
-                                padding: EdgeInsets.only(top: 7.0),
-                                decoration: BoxDecoration(
-                                  border: Border(
-                                    top: BorderSide(color: Colors.grey, width: 0.5),
-                                  ),
-                                ),
-                                child: SizedBox(
-                                  width: double.infinity,
-                                  child: Text(
-                                    '备注：${item.remark}',
-                                    style: TextStyle(
-                                      color: Color.fromARGB(255, 118, 112, 112),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ],
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                ),
+                  );
+                },
               );
             },
           );
