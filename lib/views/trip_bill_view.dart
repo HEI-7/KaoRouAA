@@ -138,13 +138,18 @@ class _TripBillListPageState extends State<TripBillListPage> {
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => TripBillPage(tripId: widget.tripId)),
+                  MaterialPageRoute(
+                    builder: (context) => TripBillPage(
+                      tripId: widget.tripId,
+                      userId: choiceUserId == 0 ? null : choiceUserId,
+                    ),
+                  ),
                 ).then((refreshFlag) {
-                  if (refreshFlag == true) {
+                  if (refreshFlag != null) {
                     if (widget.refresh) {
                       widget.onChanged(false);
                     }
-                    refreshTripBillList(0);
+                    refreshTripBillList(choiceUserId == 0 ? 0 : refreshFlag[1]);
                   }
                 });
               },
@@ -239,11 +244,11 @@ class _TripBillListPageState extends State<TripBillListPage> {
                               ),
                             ),
                           ).then((refreshFlag) {
-                            if (refreshFlag == true) {
+                            if (refreshFlag != null) {
                               if (widget.refresh) {
                                 widget.onChanged(false);
                               }
-                              refreshTripBillList(0);
+                              refreshTripBillList(choiceUserId == 0 ? 0 : refreshFlag[1]);
                             }
                           });
                         },
@@ -764,7 +769,7 @@ class _TripBillPageState extends State<TripBillPage> {
                           ),
                           onPressed: () {
                             if (saveOrUpdate()) {
-                              Navigator.pop(context, true);
+                              Navigator.pop(context, [true, _selectUserId]);
                             }
                           },
                           child: const Text('确认'),
