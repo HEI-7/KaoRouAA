@@ -67,50 +67,55 @@ class _TripBillListPageState extends State<TripBillListPage> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Row(
-            children: [
-              ...[
-                TextButton(
-                  style: ButtonStyle(
-                    foregroundColor: WidgetStateProperty.resolveWith<Color?>(
-                      (Set<WidgetState> states) {
-                        if (states.contains(WidgetState.selected)) {
-                          return Colors.white;
+        FutureBuilder(
+          future: tripBillList,
+          builder: (BuildContext context, AsyncSnapshot snapshot) {
+            if (!snapshot.hasData) {
+              return const SizedBox(height: 10);
+            }
+
+            return SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: [
+                  ...[
+                    TextButton(
+                      style: ButtonStyle(
+                        backgroundColor: WidgetStateProperty.resolveWith<Color?>(
+                          (Set<WidgetState> states) {
+                            return choiceUserId == 0 ? const Color.fromARGB(255, 129, 201, 132) : null;
+                          },
+                        ),
+                      ),
+                      child: const Text('全部'),
+                      onPressed: () {
+                        if (choiceUserId != 0) {
+                          refreshTripBillList(0);
                         }
-                        // return Colors.indigo;
-                        return null; // defer to the defaults
                       },
                     ),
-                    backgroundColor: WidgetStateProperty.resolveWith<Color?>(
-                      (Set<WidgetState> states) {
-                        if (states.contains(WidgetState.selected)) {
-                          return Colors.indigo;
+                  ],
+                  ...tripUserList.map<TextButton>((obj) {
+                    return TextButton(
+                      style: ButtonStyle(
+                        backgroundColor: WidgetStateProperty.resolveWith<Color?>(
+                          (Set<WidgetState> states) {
+                            return choiceUserId == obj.id ? const Color.fromARGB(255, 129, 201, 132) : null;
+                          },
+                        ),
+                      ),
+                      child: Text(obj.name),
+                      onPressed: () {
+                        if (choiceUserId != obj.id) {
+                          refreshTripBillList(obj.id);
                         }
-                        // return Colors.indigo;
-                        return null; // defer to the defaults
                       },
-                    ),
-                    overlayColor: WidgetStateProperty.all(Colors.transparent),
-                  ),
-                  child: const Text('全部'),
-                  onPressed: () {
-                    // debugPrint(0);
-                  },
-                ),
-              ],
-              ...tripUserList.map<TextButton>((obj) {
-                return TextButton(
-                  // icon: const Icon(Icons.person_add),
-                  child: Text(obj.name),
-                  onPressed: () {
-                    debugPrint(obj.id.toString());
-                  },
-                );
-              }),
-            ],
-          ),
+                    );
+                  }),
+                ],
+              ),
+            );
+          },
         ),
         Expanded(child: tripBillListWidget()),
         Align(
