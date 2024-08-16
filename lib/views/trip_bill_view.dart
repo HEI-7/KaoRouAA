@@ -39,7 +39,7 @@ class _TripBillListPageState extends State<TripBillListPage> {
       tripUserList = TripProvider().listTripUser(widget.tripId);
       for (final userObj in await tripUserList) {
         final obj = TripUser(id: userObj.id, name: userObj.name);
-        if (userId == userObj.id) {
+        if (userId == obj.id) {
           _userList.insert(0, obj);
         } else {
           _userList.add(obj);
@@ -83,46 +83,48 @@ class _TripBillListPageState extends State<TripBillListPage> {
               return const SizedBox(height: 10);
             }
 
-            return SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: [
-                  ...[
-                    TextButton(
-                      style: ButtonStyle(
-                        backgroundColor: WidgetStateProperty.resolveWith<Color?>(
-                          (Set<WidgetState> states) {
-                            return choiceUserId == 0 ? const Color.fromARGB(255, 129, 201, 132) : null;
-                          },
-                        ),
-                      ),
-                      child: const Text('全部'),
-                      onPressed: () {
-                        if (choiceUserId != 0) {
-                          refreshTripBillList(0);
-                        }
+            return Row(
+              children: [
+                TextButton(
+                  style: ButtonStyle(
+                    backgroundColor: WidgetStateProperty.resolveWith<Color?>(
+                      (Set<WidgetState> states) {
+                        return choiceUserId == 0 ? const Color.fromARGB(255, 129, 201, 132) : null;
                       },
                     ),
-                  ],
-                  ..._userList.map<TextButton>((obj) {
-                    return TextButton(
-                      style: ButtonStyle(
-                        backgroundColor: WidgetStateProperty.resolveWith<Color?>(
-                          (Set<WidgetState> states) {
-                            return choiceUserId == obj.id ? const Color.fromARGB(255, 129, 201, 132) : null;
+                  ),
+                  child: const Text('全部'),
+                  onPressed: () {
+                    if (choiceUserId != 0) {
+                      refreshTripBillList(0);
+                    }
+                  },
+                ),
+                Expanded(
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children: _userList.map<TextButton>((obj) {
+                        return TextButton(
+                          style: ButtonStyle(
+                            backgroundColor: WidgetStateProperty.resolveWith<Color?>(
+                              (Set<WidgetState> states) {
+                                return choiceUserId == obj.id ? const Color.fromARGB(255, 129, 201, 132) : null;
+                              },
+                            ),
+                          ),
+                          child: Text(obj.name),
+                          onPressed: () {
+                            if (choiceUserId != obj.id) {
+                              refreshTripBillList(obj.id);
+                            }
                           },
-                        ),
-                      ),
-                      child: Text(obj.name),
-                      onPressed: () {
-                        if (choiceUserId != obj.id) {
-                          refreshTripBillList(obj.id);
-                        }
-                      },
-                    );
-                  }),
-                ],
-              ),
+                        );
+                      }).toList(),
+                    ),
+                  ),
+                ),
+              ],
             );
           },
         ),
