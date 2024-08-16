@@ -9,15 +9,6 @@ import 'package:kao_rou_aa/models/trip_bill.dart';
 import 'package:kao_rou_aa/models/trip_bill_detail.dart';
 import 'package:kao_rou_aa/services/trip_service.dart';
 
-Future<Map<int, String>> getTripUserMap(int tripId) async {
-  List tripUserList = await TripProvider().listTripUser(tripId);
-  return {for (var obj in tripUserList) obj.id: obj.name};
-}
-
-Future<List<TripUser>> getTripUserList(int tripId) async {
-  return await TripProvider().listTripUser(tripId);
-}
-
 class TripBillListPage extends StatefulWidget {
   const TripBillListPage({
     super.key,
@@ -41,20 +32,20 @@ class _TripBillListPageState extends State<TripBillListPage> {
   Future? tripBillList;
   List tripUserList = [];
 
-  refreshTripBillList() async {
-    print(widget.userId);
-    tripUserList = await getTripUserList(widget.tripId);
-    _userMap ??= {for (var obj in tripUserList!) obj.id: obj.name};
+  refreshTripBillList(int userId) async {
+    if (tripUserList.isEmpty) {
+      tripUserList = await TripProvider().listTripUser(widget.tripId);
+      _userMap ??= {for (var obj in tripUserList) obj.id: obj.name};
+    }
 
-    // _userMap ??= await getTripUserMap(widget.tripId);
-    tripBillList = TripProvider().listTripBill(widget.tripId, 0);
+    tripBillList = TripProvider().listTripBill(widget.tripId, userId);
     setState(() {});
   }
 
   @override
   void initState() {
     super.initState();
-    refreshTripBillList();
+    refreshTripBillList(widget.userId);
   }
 
   funcAAUserNameString(String aaUsers) {
@@ -130,7 +121,7 @@ class _TripBillListPageState extends State<TripBillListPage> {
                   MaterialPageRoute(builder: (context) => TripBillPage(tripId: widget.tripId)),
                 ).then((refreshFlag) {
                   if (refreshFlag == true) {
-                    refreshTripBillList();
+                    refreshTripBillList(0);
                     // setState(() {
                     //   refreshList = true;
                     // });
@@ -223,7 +214,7 @@ class _TripBillListPageState extends State<TripBillListPage> {
                           ),
                         ),
                       ).then((refreshFlag) {
-                        refreshTripBillList();
+                        refreshTripBillList(0);
                         // if (refreshFlag == true) {
                         //   refreshTripBillList();
                         // }
