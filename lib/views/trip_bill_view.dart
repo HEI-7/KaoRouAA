@@ -42,6 +42,7 @@ class _TripBillListPageState extends State<TripBillListPage> {
   List tripUserList = [];
 
   refreshTripBillList() async {
+    print(widget.userId);
     tripUserList = await getTripUserList(widget.tripId);
     _userMap ??= {for (var obj in tripUserList!) obj.id: obj.name};
 

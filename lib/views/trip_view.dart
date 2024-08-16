@@ -429,9 +429,14 @@ class _TripDetailPageState extends State<TripDetailPage> {
   bool _refresh = false;
   void _handleRefreshChanged(bool newValue) {
     _refresh = newValue;
-    // setState(() {
-    //   _refresh = newValue;
-    // });
+  }
+
+  int userId = 0;
+  void _handleChoiceUser(int newUser) {
+    setState(() {
+      userId = newUser;
+      selectedIndex = 1;
+    });
   }
 
   @override
@@ -439,10 +444,20 @@ class _TripDetailPageState extends State<TripDetailPage> {
     Widget page;
     switch (selectedIndex) {
       case 0:
-        page = TripUserListPage(tripId: widget.tripId, refresh: _refresh, onChanged: _handleRefreshChanged);
+        page = TripUserListPage(
+          tripId: widget.tripId,
+          refresh: _refresh,
+          onChanged: _handleRefreshChanged,
+          clickUser: _handleChoiceUser,
+        );
         break;
       case 1:
-        page = TripBillListPage(tripId: widget.tripId, refresh: _refresh, onChanged: _handleRefreshChanged, userId: 0);
+        page = TripBillListPage(
+          tripId: widget.tripId,
+          refresh: _refresh,
+          onChanged: _handleRefreshChanged,
+          userId: userId,
+        );
         break;
       default:
         throw UnimplementedError('no widget for $selectedIndex');
@@ -462,6 +477,7 @@ class _TripDetailPageState extends State<TripDetailPage> {
         onTap: (int index) {
           setState(() {
             selectedIndex = index;
+            userId = 0;
           });
         },
         items: const [

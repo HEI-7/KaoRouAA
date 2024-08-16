@@ -12,11 +12,13 @@ class TripUserListPage extends StatefulWidget {
     required this.tripId,
     required this.refresh,
     required this.onChanged,
+    required this.clickUser,
   });
 
   final int tripId;
   final bool refresh;
   final ValueChanged<bool> onChanged;
+  final ValueChanged<int> clickUser;
 
   @override
   State<TripUserListPage> createState() => _TripUserListPageState();
@@ -118,8 +120,31 @@ class _TripUserListPageState extends State<TripUserListPage> {
                 key: ValueKey(index),
                 endActionPane: ActionPane(
                   motion: const ScrollMotion(),
-                  extentRatio: 0.2,
+                  extentRatio: 0.4,
                   children: [
+                    SlidableAction(
+                      onPressed: (context) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => TripUserPage(
+                              tripId: widget.tripId,
+                              id: item.id,
+                              name: item.name,
+                              avatar: item.avatar,
+                            ),
+                          ),
+                        ).then((refreshFlag) {
+                          if (refreshFlag == true) {
+                            setState(() {
+                              refreshList = true;
+                            });
+                          }
+                        });
+                      },
+                      backgroundColor: Colors.blue,
+                      icon: Icons.edit,
+                    ),
                     SlidableAction(
                       onPressed: (context) async {
                         bool? delete = await showDeleteConfirmDialog(item.name);
@@ -141,23 +166,7 @@ class _TripUserListPageState extends State<TripUserListPage> {
                 ),
                 child: GestureDetector(
                   onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => TripUserPage(
-                          tripId: widget.tripId,
-                          id: item.id,
-                          name: item.name,
-                          avatar: item.avatar,
-                        ),
-                      ),
-                    ).then((refreshFlag) {
-                      if (refreshFlag == true) {
-                        setState(() {
-                          refreshList = true;
-                        });
-                      }
-                    });
+                    widget.clickUser(item.id);
                   },
                   child: Row(
                     children: [
