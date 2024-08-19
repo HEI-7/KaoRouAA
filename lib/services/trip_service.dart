@@ -161,7 +161,7 @@ class TripProvider extends DBProvider {
     );
   }
 
-  Future<List<TripBill>> listTripBill(int tripId, int userId) async {
+  Future<List<TripBill>> listTripBill(int tripId, int userId, bool aaList) async {
     final db = await _db;
     final List<Map<String, Object?>> tripBillMaps;
 
@@ -173,10 +173,16 @@ class TripProvider extends DBProvider {
         orderBy: 'date desc, id desc',
       );
     } else {
+      String queryStr = 'tripId = ? and userId = ?';
+      if (aaList) {
+        queryStr = 'tripId = ? and id in (select billId from trip_bill_detail where userId = ?)';
+      }
+
       tripBillMaps = await db.query(
         'trip_bill',
         // where: 'tripId = ? and userId = ?',
-        where: 'tripId = ? and id in (select billId from trip_bill_detail where userId = ?)',
+        // where: 'tripId = ? and id in (select billId from trip_bill_detail where userId = ?)',
+        where: queryStr,
         whereArgs: [tripId, userId],
         orderBy: 'date desc, id desc',
       );

@@ -183,7 +183,7 @@ class _TripUserListPageState extends State<TripUserListPage> {
                             border: border,
                           ),
                           child: Padding(
-                            padding: const EdgeInsets.only(left: 7, top: 12, bottom: 12),
+                            padding: const EdgeInsets.only(left: 12, top: 12, bottom: 12),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [

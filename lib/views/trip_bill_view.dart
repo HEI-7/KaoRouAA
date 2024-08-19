@@ -36,6 +36,7 @@ class _TripBillListPageState extends State<TripBillListPage> {
   int choiceUserId = 0;
   bool firstScroll = true;
   GlobalKey k = GlobalKey();
+  bool _aaListSwitch = false;
 
   refreshTripBillList(int userId) async {
     if (_userList.isEmpty) {
@@ -47,7 +48,7 @@ class _TripBillListPageState extends State<TripBillListPage> {
       _avatarMap ??= {for (var obj in _userList) obj.id: obj.avatar};
     }
 
-    tripBillList = TripProvider().listTripBill(widget.tripId, userId);
+    tripBillList = TripProvider().listTripBill(widget.tripId, userId, _aaListSwitch);
     setState(() {
       choiceUserId = userId;
     });
@@ -139,34 +140,57 @@ class _TripBillListPageState extends State<TripBillListPage> {
           },
         ),
         Expanded(child: tripBillListWidget()),
-        Align(
-          alignment: Alignment.centerRight,
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: FloatingActionButton.small(
-              elevation: 1,
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => TripBillPage(
-                      tripId: widget.tripId,
-                      userId: choiceUserId == 0 ? null : choiceUserId,
-                    ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            if (choiceUserId != 0) ...[
+              Row(
+                children: [
+                  const SizedBox(width: 10),
+                  Switch(
+                    value: _aaListSwitch,
+                    onChanged: (value) {
+                      _aaListSwitch = value;
+                      refreshTripBillList(choiceUserId);
+                    },
                   ),
-                ).then((refreshFlag) {
-                  if (refreshFlag != null) {
-                    if (widget.refresh) {
-                      widget.onChanged(false);
-                    }
-                    refreshTripBillList(choiceUserId == 0 ? 0 : refreshFlag[1]);
-                  }
-                });
-              },
-              backgroundColor: Colors.lightBlue,
-              child: const Icon(Icons.add),
+                  const SizedBox(width: 10),
+                  const Text('查看该用户的AA'),
+                ],
+              ),
+            ] else ...[
+              const SizedBox(),
+            ],
+            Align(
+              alignment: Alignment.centerRight,
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: FloatingActionButton.small(
+                  elevation: 1,
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => TripBillPage(
+                          tripId: widget.tripId,
+                          userId: choiceUserId == 0 ? null : choiceUserId,
+                        ),
+                      ),
+                    ).then((refreshFlag) {
+                      if (refreshFlag != null) {
+                        if (widget.refresh) {
+                          widget.onChanged(false);
+                        }
+                        refreshTripBillList(choiceUserId == 0 ? 0 : refreshFlag[1]);
+                      }
+                    });
+                  },
+                  backgroundColor: Colors.lightBlue,
+                  child: const Icon(Icons.add),
+                ),
+              ),
             ),
-          ),
+          ],
         ),
       ],
     );
