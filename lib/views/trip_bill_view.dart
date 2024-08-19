@@ -34,8 +34,8 @@ class _TripBillListPageState extends State<TripBillListPage> {
   final List _userList = [];
 
   int choiceUserId = 0;
-  GlobalKey k = GlobalKey();
   bool firstScroll = true;
+  GlobalKey k = GlobalKey();
 
   refreshTripBillList(int userId) async {
     if (_userList.isEmpty) {
@@ -83,7 +83,7 @@ class _TripBillListPageState extends State<TripBillListPage> {
 
             if (choiceUserId != 0 && firstScroll) {
               firstScroll = false;
-              WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
                 Scrollable.ensureVisible(k.currentContext!, duration: const Duration(seconds: 1));
               });
             }
