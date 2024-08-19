@@ -175,7 +175,8 @@ class TripProvider extends DBProvider {
     } else {
       tripBillMaps = await db.query(
         'trip_bill',
-        where: 'tripId = ? and userId = ?',
+        // where: 'tripId = ? and userId = ?',
+        where: 'tripId = ? and id in (select billId from trip_bill_detail where userId = ?)',
         whereArgs: [tripId, userId],
         orderBy: 'date desc, id desc',
       );
