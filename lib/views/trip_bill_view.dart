@@ -533,6 +533,23 @@ class _TripBillPageState extends State<TripBillPage> {
         );
         return false;
       }
+      if (double.parse(payInput) <= 0) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              '请输入一个合理金额',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+              ),
+            ),
+            backgroundColor: Color.fromARGB(255, 205, 50, 36),
+            duration: Durations.long3,
+          ),
+        );
+        return false;
+      }
       if (_selectUserAA.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
