@@ -90,7 +90,7 @@ class _TripBillListPageState extends State<TripBillListPage> {
             }
 
             return Padding(
-              padding: const EdgeInsets.only(left: 5, right: 5, bottom: 5),
+              padding: const EdgeInsets.only(left: 5, right: 5),
               child: Row(
                 children: [
                   TextButton(
@@ -237,8 +237,9 @@ class _TripBillListPageState extends State<TripBillListPage> {
                       });
                     },
                     child: Padding(
-                      padding: const EdgeInsets.only(left: 5, right: 5, bottom: 5),
+                      padding: const EdgeInsets.only(left: 10, right: 10, top: 10),
                       child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Column(
                             children: [
@@ -246,13 +247,20 @@ class _TripBillListPageState extends State<TripBillListPage> {
                                 'images/${_avatarMap![item.userId]}',
                                 width: 40,
                               ),
-                              Text(_userMap![item.userId]!),
+                              Text(
+                                _userMap![item.userId]!,
+                                style: const TextStyle(fontSize: 13),
+                              ),
                             ],
                           ),
                           const SizedBox(width: 10),
                           Expanded(
                             child: Container(
-                              color: Colors.white,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(15),
+                                color: Colors.white,
+                              ),
+                              // color: Colors.white,
                               child: Padding(
                                 padding: EdgeInsets.only(left: 17.0, right: 17.0, top: 7.0, bottom: 7.0),
                                 child: Column(
