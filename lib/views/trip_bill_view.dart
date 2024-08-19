@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_slidable/flutter_slidable.dart';
 
 import 'package:kao_rou_aa/models/trip_user.dart';
 import 'package:kao_rou_aa/models/trip_bill.dart';
@@ -29,6 +28,7 @@ class TripBillListPage extends StatefulWidget {
 
 class _TripBillListPageState extends State<TripBillListPage> {
   Map<int, String>? _userMap;
+  Map<int, String>? _avatarMap;
   Future? tripBillList;
   Future? tripUserList;
   final List _userList = [];
@@ -41,9 +41,10 @@ class _TripBillListPageState extends State<TripBillListPage> {
     if (_userList.isEmpty) {
       tripUserList = TripProvider().listTripUser(widget.tripId);
       for (final userObj in await tripUserList) {
-        _userList.add(TripUser(id: userObj.id, name: userObj.name));
+        _userList.add(TripUser(id: userObj.id, name: userObj.name, avatar: userObj.avatar));
       }
       _userMap ??= {for (var obj in _userList) obj.id: obj.name};
+      _avatarMap ??= {for (var obj in _userList) obj.id: obj.avatar};
     }
 
     tripBillList = TripProvider().listTripBill(widget.tripId, userId);
@@ -78,7 +79,7 @@ class _TripBillListPageState extends State<TripBillListPage> {
           future: tripUserList,
           builder: (BuildContext context, AsyncSnapshot snapshot) {
             if (!snapshot.hasData) {
-              return const SizedBox(height: 10);
+              return const SizedBox();
             }
 
             if (choiceUserId != 0 && firstScroll) {
@@ -88,49 +89,52 @@ class _TripBillListPageState extends State<TripBillListPage> {
               });
             }
 
-            return Row(
-              children: [
-                TextButton(
-                  style: ButtonStyle(
-                    backgroundColor: WidgetStateProperty.resolveWith<Color?>(
-                      (Set<WidgetState> states) {
-                        return choiceUserId == 0 ? const Color.fromARGB(255, 129, 201, 132) : null;
-                      },
+            return Padding(
+              padding: const EdgeInsets.only(left: 5, right: 5, bottom: 5),
+              child: Row(
+                children: [
+                  TextButton(
+                    style: ButtonStyle(
+                      backgroundColor: WidgetStateProperty.resolveWith<Color?>(
+                        (Set<WidgetState> states) {
+                          return choiceUserId == 0 ? const Color.fromARGB(255, 129, 201, 132) : null;
+                        },
+                      ),
                     ),
+                    child: const Text('全部'),
+                    onPressed: () {
+                      if (choiceUserId != 0) {
+                        refreshTripBillList(0);
+                      }
+                    },
                   ),
-                  child: const Text('全部'),
-                  onPressed: () {
-                    if (choiceUserId != 0) {
-                      refreshTripBillList(0);
-                    }
-                  },
-                ),
-                Expanded(
-                  child: SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Row(
-                      children: _userList.map<TextButton>((obj) {
-                        return TextButton(
-                          key: obj.id == choiceUserId ? k : null,
-                          style: ButtonStyle(
-                            backgroundColor: WidgetStateProperty.resolveWith<Color?>(
-                              (Set<WidgetState> states) {
-                                return choiceUserId == obj.id ? const Color.fromARGB(255, 129, 201, 132) : null;
-                              },
+                  Expanded(
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        children: _userList.map<TextButton>((obj) {
+                          return TextButton(
+                            key: obj.id == choiceUserId ? k : null,
+                            style: ButtonStyle(
+                              backgroundColor: WidgetStateProperty.resolveWith<Color?>(
+                                (Set<WidgetState> states) {
+                                  return choiceUserId == obj.id ? const Color.fromARGB(255, 129, 201, 132) : null;
+                                },
+                              ),
                             ),
-                          ),
-                          child: Text(obj.name),
-                          onPressed: () {
-                            if (choiceUserId != obj.id) {
-                              refreshTripBillList(obj.id);
-                            }
-                          },
-                        );
-                      }).toList(),
+                            child: Text(obj.name),
+                            onPressed: () {
+                              if (choiceUserId != obj.id) {
+                                refreshTripBillList(obj.id);
+                              }
+                            },
+                          );
+                        }).toList(),
+                      ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             );
           },
         ),
@@ -207,143 +211,131 @@ class _TripBillListPageState extends State<TripBillListPage> {
 
                   var item = snapshot.data[index];
 
-                  return Container(
-                    margin: EdgeInsets.only(bottom: 10.0),
-                    child: Slidable(
-                      key: ValueKey(index),
-                      endActionPane: ActionPane(
-                        motion: ScrollMotion(),
-                        extentRatio: 0.2,
+                  return InkWell(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => TripBillPage(
+                            tripId: widget.tripId,
+                            id: item.id,
+                            userId: item.userId,
+                            pay: item.pay,
+                            date: item.date,
+                            type: item.type,
+                            remark: item.remark,
+                            aaUsers: item.aaUsers,
+                          ),
+                        ),
+                      ).then((refreshFlag) {
+                        if (refreshFlag != null) {
+                          if (widget.refresh) {
+                            widget.onChanged(false);
+                          }
+                          refreshTripBillList(choiceUserId == 0 ? 0 : refreshFlag[1]);
+                        }
+                      });
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.only(left: 5, right: 5, bottom: 5),
+                      child: Row(
                         children: [
-                          SlidableAction(
-                            onPressed: (context) async {
-                              String payString = item.pay.toStringAsFixed(2);
-                              String desc = '${_userMap![item.userId]}在${item.date}支付的${item.type}费用\n\n$payString';
-                              bool? delete = await showDeleteConfirmDialog(desc);
-                              if (delete == true) {
-                                await TripProvider().deleteTripBillCascade(item.id);
-                                if (widget.refresh) {
-                                  widget.onChanged(false);
-                                }
-                                snapshot.data.remove(item);
-                                setListState(() {});
-                              }
-                            },
-                            backgroundColor: Color(0xFFFE4A49),
-                            icon: Icons.delete,
-                          ),
-                        ],
-                      ),
-                      child: GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => TripBillPage(
-                                tripId: widget.tripId,
-                                id: item.id,
-                                userId: item.userId,
-                                pay: item.pay,
-                                date: item.date,
-                                type: item.type,
-                                remark: item.remark,
-                                aaUsers: item.aaUsers,
+                          Column(
+                            children: [
+                              Image.asset(
+                                'images/${_avatarMap![item.userId]}',
+                                width: 40,
                               ),
-                            ),
-                          ).then((refreshFlag) {
-                            if (refreshFlag != null) {
-                              if (widget.refresh) {
-                                widget.onChanged(false);
-                              }
-                              refreshTripBillList(choiceUserId == 0 ? 0 : refreshFlag[1]);
-                            }
-                          });
-                        },
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: Colors.white,
+                              Text(_userMap![item.userId]!),
+                            ],
                           ),
-                          child: Padding(
-                            padding: EdgeInsets.only(left: 17.0, right: 17.0, top: 7.0, bottom: 7.0),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Container(
-                                  padding: EdgeInsets.only(bottom: 7.0),
-                                  decoration: BoxDecoration(
-                                    border: Border(
-                                      bottom: BorderSide(color: Colors.grey, width: 0.5),
-                                    ),
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      Text(
-                                        _userMap![item.userId]!,
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 18,
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Container(
+                              color: Colors.white,
+                              child: Padding(
+                                padding: EdgeInsets.only(left: 17.0, right: 17.0, top: 7.0, bottom: 7.0),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Container(
+                                      padding: EdgeInsets.only(bottom: 7.0),
+                                      decoration: BoxDecoration(
+                                        border: Border(
+                                          bottom: BorderSide(color: Colors.grey, width: 0.5),
                                         ),
                                       ),
-                                      Expanded(
-                                        child: Align(
-                                          alignment: Alignment.bottomRight,
-                                          child: Text(
-                                            '¥ ${item.pay.toStringAsFixed(2)}',
+                                      child: Row(
+                                        children: [
+                                          Text(
+                                            _userMap![item.userId]!,
                                             style: TextStyle(
                                               fontWeight: FontWeight.bold,
-                                              fontSize: 16,
-                                              color: Colors.red,
+                                              fontSize: 18,
+                                            ),
+                                          ),
+                                          Expanded(
+                                            child: Align(
+                                              alignment: Alignment.bottomRight,
+                                              child: Text(
+                                                '¥ ${item.pay.toStringAsFixed(2)}',
+                                                style: TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 16,
+                                                  color: Colors.red,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    Container(
+                                      padding: EdgeInsets.only(top: 7.0, bottom: 5.0),
+                                      child: Row(
+                                        children: [
+                                          Text(item.type),
+                                          Expanded(
+                                            child: Align(
+                                              alignment: Alignment.bottomRight,
+                                              child: Text(item.date),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    Text(
+                                      'AA：${funcAAUserNameString(item.aaUsers)}',
+                                      style: TextStyle(
+                                        color: Color.fromARGB(255, 118, 112, 112),
+                                      ),
+                                    ),
+                                    if (item.remark != '') ...[
+                                      Container(
+                                        margin: EdgeInsets.only(top: 7.0),
+                                        padding: EdgeInsets.only(top: 7.0),
+                                        decoration: BoxDecoration(
+                                          border: Border(
+                                            top: BorderSide(color: Colors.grey, width: 0.5),
+                                          ),
+                                        ),
+                                        child: SizedBox(
+                                          width: double.infinity,
+                                          child: Text(
+                                            '备注：${item.remark}',
+                                            style: TextStyle(
+                                              color: Color.fromARGB(255, 118, 112, 112),
                                             ),
                                           ),
                                         ),
                                       ),
                                     ],
-                                  ),
+                                  ],
                                 ),
-                                Container(
-                                  padding: EdgeInsets.only(top: 7.0, bottom: 5.0),
-                                  child: Row(
-                                    children: [
-                                      Text(item.type),
-                                      Expanded(
-                                        child: Align(
-                                          alignment: Alignment.bottomRight,
-                                          child: Text(item.date),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                Text(
-                                  'AA：${funcAAUserNameString(item.aaUsers)}',
-                                  style: TextStyle(
-                                    color: Color.fromARGB(255, 118, 112, 112),
-                                  ),
-                                ),
-                                if (item.remark != '') ...[
-                                  Container(
-                                    margin: EdgeInsets.only(top: 7.0),
-                                    padding: EdgeInsets.only(top: 7.0),
-                                    decoration: BoxDecoration(
-                                      border: Border(
-                                        top: BorderSide(color: Colors.grey, width: 0.5),
-                                      ),
-                                    ),
-                                    child: SizedBox(
-                                      width: double.infinity,
-                                      child: Text(
-                                        '备注：${item.remark}',
-                                        style: TextStyle(
-                                          color: Color.fromARGB(255, 118, 112, 112),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ],
+                              ),
                             ),
                           ),
-                        ),
+                        ],
                       ),
                     ),
                   );
@@ -354,38 +346,6 @@ class _TripBillListPageState extends State<TripBillListPage> {
         } else {
           return const Center(child: CircularProgressIndicator());
         }
-      },
-    );
-  }
-
-  Future<bool?> showDeleteConfirmDialog(String desc) {
-    return showDialog<bool>(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text(
-            "提示",
-            style: TextStyle(fontSize: 20),
-          ),
-          content: Text(
-            "您确定要删除该笔流水\n\n$desc ？",
-            textAlign: TextAlign.center,
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: const Text("取消"),
-              onPressed: () => Navigator.of(context).pop(false),
-            ),
-            TextButton(
-              child: const Text(
-                "删除",
-                style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
-              ),
-              onPressed: () => Navigator.of(context).pop(true),
-            ),
-          ],
-        );
       },
     );
   }
@@ -483,6 +443,39 @@ class _TripBillPageState extends State<TripBillPage> {
     }).toList();
 
     await TripProvider().batchTripBillDetail(billId, objs);
+  }
+
+  // 删除
+  Future<bool?> showDeleteConfirmDialog() {
+    return showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text(
+            "提示",
+            style: TextStyle(fontSize: 20),
+          ),
+          content: const Text(
+            "您确定要删除该笔流水 ？",
+            textAlign: TextAlign.center,
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text("取消"),
+              onPressed: () => Navigator.of(context).pop(false),
+            ),
+            TextButton(
+              child: const Text(
+                "删除",
+                style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+              ),
+              onPressed: () => Navigator.of(context).pop(true),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   var payController = TextEditingController(); // 金额
@@ -785,6 +778,24 @@ class _TripBillPageState extends State<TripBillPage> {
                     Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
+                        if (widget.id != null && !_oneMore) ...[
+                          ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              textStyle: const TextStyle(fontWeight: FontWeight.bold),
+                              backgroundColor: const Color.fromARGB(255, 205, 50, 36),
+                              foregroundColor: Colors.white,
+                            ),
+                            onPressed: () async {
+                              bool? delete = await showDeleteConfirmDialog();
+                              if (delete == true) {
+                                await TripProvider().deleteTripBillCascade(widget.id!);
+                                Navigator.pop(context, [true, _selectUserId]);
+                              }
+                            },
+                            child: const Text('删除'),
+                          ),
+                          const SizedBox(width: 20),
+                        ],
                         ElevatedButton(
                           style: ElevatedButton.styleFrom(
                             textStyle: const TextStyle(fontWeight: FontWeight.bold),
@@ -798,7 +809,7 @@ class _TripBillPageState extends State<TripBillPage> {
                           },
                           child: const Text('确认'),
                         ),
-                        const SizedBox(width: 30),
+                        const SizedBox(width: 20),
                         ElevatedButton(
                           style: ElevatedButton.styleFrom(
                             textStyle: const TextStyle(fontWeight: FontWeight.bold),
