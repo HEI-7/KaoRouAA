@@ -120,7 +120,7 @@ class _TripUserListPageState extends State<TripUserListPage> {
                 key: ValueKey(index),
                 endActionPane: ActionPane(
                   motion: const ScrollMotion(),
-                  extentRatio: 0.4,
+                  extentRatio: 0.35,
                   children: [
                     SlidableAction(
                       onPressed: (context) {
@@ -174,7 +174,7 @@ class _TripUserListPageState extends State<TripUserListPage> {
                         padding: const EdgeInsets.only(left: 10, right: 10),
                         child: Image.asset(
                           'images/${item.avatar}',
-                          width: 45,
+                          width: 40,
                         ),
                       ),
                       Expanded(
@@ -191,10 +191,15 @@ class _TripUserListPageState extends State<TripUserListPage> {
                                   item.name,
                                   style: const TextStyle(
                                     fontWeight: FontWeight.bold,
-                                    fontSize: 18,
+                                    fontSize: 16,
                                   ),
                                 ),
-                                Text("应付 ${item.pay.toStringAsFixed(2)}，实付 ${item.payAct.toStringAsFixed(2)}"),
+                                Text(
+                                  "应付 ${item.pay.toStringAsFixed(2)}，实付 ${item.payAct.toStringAsFixed(2)}",
+                                  style: const TextStyle(
+                                    fontSize: 13,
+                                  ),
+                                ),
                               ],
                             ),
                           ),
