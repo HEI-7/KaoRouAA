@@ -210,7 +210,6 @@ class _TripBillListPageState extends State<TripBillListPage> {
                   }
 
                   var item = snapshot.data[index];
-
                   return InkWell(
                     onTap: () {
                       Navigator.push(
@@ -241,17 +240,20 @@ class _TripBillListPageState extends State<TripBillListPage> {
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Column(
-                            children: [
-                              Image.asset(
-                                'images/${_avatarMap![item.userId]}',
-                                width: 40,
-                              ),
-                              Text(
-                                _userMap![item.userId]!,
-                                style: const TextStyle(fontSize: 13),
-                              ),
-                            ],
+                          Padding(
+                            padding: const EdgeInsets.only(top: 5),
+                            child: Column(
+                              children: [
+                                Image.asset(
+                                  'images/${_avatarMap![item.userId]}',
+                                  width: 40,
+                                ),
+                                Text(
+                                  _userMap![item.userId]!,
+                                  style: const TextStyle(fontSize: 13),
+                                ),
+                              ],
+                            ),
                           ),
                           const SizedBox(width: 10),
                           Expanded(
@@ -260,84 +262,67 @@ class _TripBillListPageState extends State<TripBillListPage> {
                                 borderRadius: BorderRadius.circular(15),
                                 color: Colors.white,
                               ),
-                              // color: Colors.white,
                               child: Padding(
-                                padding: EdgeInsets.only(left: 17.0, right: 17.0, top: 7.0, bottom: 7.0),
+                                padding: const EdgeInsets.only(top: 10, bottom: 10, left: 15, right: 15),
                                 child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Container(
-                                      padding: EdgeInsets.only(bottom: 7.0),
-                                      decoration: BoxDecoration(
-                                        border: Border(
-                                          bottom: BorderSide(color: Colors.grey, width: 0.5),
-                                        ),
-                                      ),
-                                      child: Row(
-                                        children: [
-                                          Text(
-                                            _userMap![item.userId]!,
-                                            style: TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 18,
-                                            ),
+                                    Row(
+                                      children: [
+                                        Text(
+                                          item.date,
+                                          style: const TextStyle(
+                                            fontSize: 15,
                                           ),
-                                          Expanded(
-                                            child: Align(
-                                              alignment: Alignment.bottomRight,
-                                              child: Text(
-                                                '¥ ${item.pay.toStringAsFixed(2)}',
-                                                style: TextStyle(
-                                                  fontWeight: FontWeight.bold,
-                                                  fontSize: 16,
-                                                  color: Colors.red,
-                                                ),
+                                        ),
+                                        Expanded(
+                                          child: Align(
+                                            alignment: Alignment.centerRight,
+                                            child: Text(
+                                              '¥ ${item.pay.toStringAsFixed(2)}',
+                                              style: const TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.red,
+                                                fontSize: 15,
                                               ),
                                             ),
                                           ),
-                                        ],
-                                      ),
-                                    ),
-                                    Container(
-                                      padding: EdgeInsets.only(top: 7.0, bottom: 5.0),
-                                      child: Row(
-                                        children: [
-                                          Text(item.type),
-                                          Expanded(
-                                            child: Align(
-                                              alignment: Alignment.bottomRight,
-                                              child: Text(item.date),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    Text(
-                                      'AA：${funcAAUserNameString(item.aaUsers)}',
-                                      style: TextStyle(
-                                        color: Color.fromARGB(255, 118, 112, 112),
-                                      ),
-                                    ),
-                                    if (item.remark != '') ...[
-                                      Container(
-                                        margin: EdgeInsets.only(top: 7.0),
-                                        padding: EdgeInsets.only(top: 7.0),
-                                        decoration: BoxDecoration(
-                                          border: Border(
-                                            top: BorderSide(color: Colors.grey, width: 0.5),
-                                          ),
                                         ),
-                                        child: SizedBox(
-                                          width: double.infinity,
+                                      ],
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Row(
+                                      children: [
+                                        Text(item.type),
+                                        const SizedBox(width: 8),
+                                        Expanded(
                                           child: Text(
-                                            '备注：${item.remark}',
-                                            style: TextStyle(
-                                              color: Color.fromARGB(255, 118, 112, 112),
+                                            item.remark,
+                                            style: const TextStyle(
+                                              color: Colors.grey,
                                             ),
                                           ),
                                         ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Container(
+                                      padding: const EdgeInsets.only(top: 7),
+                                      decoration: const BoxDecoration(
+                                        border: Border(
+                                          top: BorderSide(color: Colors.grey, width: 0.5),
+                                        ),
                                       ),
-                                    ],
+                                      child: SizedBox(
+                                        width: double.infinity,
+                                        child: Text(
+                                          '${funcAAUserNameString(item.aaUsers)}',
+                                          style: const TextStyle(
+                                            color: Color.fromARGB(255, 118, 112, 112),
+                                            fontSize: 13,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
                                   ],
                                 ),
                               ),
