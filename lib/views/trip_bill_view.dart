@@ -189,23 +189,24 @@ class _TripBillListPageState extends State<TripBillListPage> {
                 itemBuilder: (context, index) {
                   if (index == snapshot.data.length) {
                     if (index > 4) {
-                      return Padding(
-                        padding: EdgeInsets.only(bottom: 15.0),
+                      return const Padding(
+                        padding: EdgeInsets.all(15),
                         child: Center(
                           child: Text(
                             '已经是最后一笔了',
                             style: TextStyle(
-                              color: Color.fromARGB(255, 118, 112, 112),
+                              color: Colors.grey,
                             ),
                           ),
                         ),
                       );
                     } else {
-                      return SizedBox();
+                      return const SizedBox();
                     }
                   }
 
                   var item = snapshot.data[index];
+
                   return Container(
                     margin: EdgeInsets.only(bottom: 10.0),
                     child: Slidable(
