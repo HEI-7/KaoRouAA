@@ -79,7 +79,7 @@ class _TripBillListPageState extends State<TripBillListPage> {
         FutureBuilder(
           future: tripUserList,
           builder: (BuildContext context, AsyncSnapshot snapshot) {
-            if (!snapshot.hasData) {
+            if (!snapshot.hasData || snapshot.data.isEmpty) {
               return const SizedBox();
             }
 
