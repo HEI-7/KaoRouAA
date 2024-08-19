@@ -32,18 +32,16 @@ class _TripBillListPageState extends State<TripBillListPage> {
   Future? tripBillList;
   Future? tripUserList;
   final List _userList = [];
+
   int choiceUserId = 0;
+  GlobalKey k = GlobalKey();
+  bool firstScroll = true;
 
   refreshTripBillList(int userId) async {
     if (_userList.isEmpty) {
       tripUserList = TripProvider().listTripUser(widget.tripId);
       for (final userObj in await tripUserList) {
-        final obj = TripUser(id: userObj.id, name: userObj.name);
-        if (userId == obj.id) {
-          _userList.insert(0, obj);
-        } else {
-          _userList.add(obj);
-        }
+        _userList.add(TripUser(id: userObj.id, name: userObj.name));
       }
       _userMap ??= {for (var obj in _userList) obj.id: obj.name};
     }
@@ -83,6 +81,13 @@ class _TripBillListPageState extends State<TripBillListPage> {
               return const SizedBox(height: 10);
             }
 
+            if (choiceUserId != 0 && firstScroll) {
+              firstScroll = false;
+              WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+                Scrollable.ensureVisible(k.currentContext!, duration: const Duration(seconds: 1));
+              });
+            }
+
             return Row(
               children: [
                 TextButton(
@@ -106,6 +111,7 @@ class _TripBillListPageState extends State<TripBillListPage> {
                     child: Row(
                       children: _userList.map<TextButton>((obj) {
                         return TextButton(
+                          key: obj.id == choiceUserId ? k : null,
                           style: ButtonStyle(
                             backgroundColor: WidgetStateProperty.resolveWith<Color?>(
                               (Set<WidgetState> states) {
