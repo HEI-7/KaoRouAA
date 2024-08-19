@@ -789,6 +789,9 @@ class _TripBillPageState extends State<TripBillPage> {
                               bool? delete = await showDeleteConfirmDialog();
                               if (delete == true) {
                                 await TripProvider().deleteTripBillCascade(widget.id!);
+                                if (!context.mounted) {
+                                  return;
+                                }
                                 Navigator.pop(context, [true, _selectUserId]);
                               }
                             },
