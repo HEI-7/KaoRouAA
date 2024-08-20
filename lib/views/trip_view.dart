@@ -310,7 +310,7 @@ class TripPage extends StatelessWidget {
                     onPressed: () async {
                       savePath ??= await getApplicationDocumentsDirectoryPath();
 
-                      final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery, imageQuality: 10);
+                      final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery, imageQuality: 30);
                       if (pickedFile != null) {
                         pickedFile.saveTo('$savePath/${pickedFile.name}');
                         picPath.value = pickedFile.name;

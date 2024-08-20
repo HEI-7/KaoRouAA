@@ -194,6 +194,7 @@ class _TripUserListPageState extends State<TripUserListPage> {
                                     fontSize: 16,
                                   ),
                                 ),
+                                const SizedBox(height: 1),
                                 Text(
                                   "应付 ${item.pay.toStringAsFixed(2)}，实付 ${item.payAct.toStringAsFixed(2)}",
                                   style: const TextStyle(
