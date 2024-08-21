@@ -44,9 +44,11 @@ iOS：仅模拟器测试运行；
 
 ### 一些截图
 
-![screenshot](/screenshot/home.jpg)
-![screenshot](/screenshot/trip.jpg)
-![screenshot](/screenshot/user.jpg)
-![screenshot](/screenshot/userList.jpg)
-![screenshot](/screenshot/bill.jpg)
-![screenshot](/screenshot/billList.jpg)
+<p>
+    <img width="360" alt="screenshot" src="/screenshot/home.jpg">
+    <img width="360" alt="screenshot" src="/screenshot/trip.jpg">
+    <img width="360" alt="screenshot" src="/screenshot/user.jpg">
+    <img width="360" alt="screenshot" src="/screenshot/userList.jpg">
+    <img width="360" alt="screenshot" src="/screenshot/bill.jpg">
+    <img width="360" alt="screenshot" src="/screenshot/billList.jpg">
+</p>
