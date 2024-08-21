@@ -39,3 +39,14 @@ iOS：仅模拟器测试运行；
 暂无
 
 开发者账号众筹中 :dog:
+<br><br>
+
+
+### 一些截图
+
+![screenshot](/screenshot/home.jpg)
+![screenshot](/screenshot/trip.jpg)
+![screenshot](/screenshot/user.jpg)
+![screenshot](/screenshot/userList.jpg)
+![screenshot](/screenshot/bill.jpg)
+![screenshot](/screenshot/billList.jpg)
