@@ -196,7 +196,7 @@ class _TripUserListPageState extends State<TripUserListPage> {
                                 ),
                                 const SizedBox(height: 1),
                                 Text(
-                                  "应付 ${item.pay.toStringAsFixed(2)}，实付 ${item.payAct.toStringAsFixed(2)}",
+                                  "应付 ${item.pay.toStringAsFixed(2)}，实付 ${item.payAct.toStringAsFixed(2)}，差额 ${(item.pay - item.payAct).toStringAsFixed(2)}",
                                   style: const TextStyle(
                                     fontSize: 13,
                                   ),
